@@ -27,6 +27,7 @@ drive db 0		      ; Used to store boot device
 load_kernel:
 	jmp read_disk	 ; Load the OS into memory
 	;jmp get_ram	 ; Get ram amount
+	call enableA20
 	jmp enter_pm	 ; Enter Protected Mode
 	
 read_disk:
@@ -76,6 +77,8 @@ kernel_segments:
 	jmp 08h:0x1000	  ; Jump to section 08h (code), offset 01000h
 	
 ;----------Global Descriptor Table----------;
+
+%include "a20.asm"
 
 gdt:			    ; Address for the GDT
 
