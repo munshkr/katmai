@@ -1,2 +1,1 @@
-boot.bin
-boot.img
+src/.*(\.o|\.bin|\.img)$
