@@ -38,17 +38,17 @@ LDFLAGS := -static -m elf_i386 -b elf32-i386 --oformat binary \
 
 all: $(DISKIMAGE)
 
-$(DISKIMAGE): $(KERNEL_BIN) $(BOOTLOADER_BIN) 
-	@echo "== Building disk image "$@" =="
+$(DISKIMAGE): $(KERNEL_BIN) $(BOOTLOADER_BIN)
+	@echo "--> Building disk image "$@
 	@echo "Remember to check if KSIZE is the same as kernel binary size!"
-	@dd if=$(BOOTLOADER_BIN) of=$(DISKIMAGE) bs=512 count=1
-	@dd if=$(KERNEL_BIN) of=$(DISKIMAGE) bs=512 seek=1
+	dd if=$(BOOTLOADER_BIN) of=$(DISKIMAGE) bs=512 count=1
+	dd if=$(KERNEL_BIN) of=$(DISKIMAGE) bs=512 seek=1
 
 clean:
 	-@$(RM) $(wildcard $(OBJFILES) $(DEPFILES) $(BOOTLOADER_BIN) $(KERNEL_BIN) $(DISKIMAGE))
 
 dist:
-	@echo "== Creating tarball "$(TAR_FILE)" =="
+	@echo "--> Creating tarball "$(TAR_FILE)
 	@tar czf $(TAR_FILE) $(ALLFILES)
 
 todolist:
@@ -58,18 +58,18 @@ todolist:
 -include $(DEPFILES)
 
 $(KERNEL_BIN): $(OBJFILES)
-	@echo "== Compiling "$@" =="
-	@$(LD) $(LDFLAGS) -o $@ $(OBJFILES)
+	@echo "--> Compiling "$@
+	$(LD) $(LDFLAGS) -o $@ $(OBJFILES)
 
 # TODO Calculate kernel binary size and pass it to nasm line in
 # bootloader so it knows exactly how much sectors it needs to read 
 # from floppy.
-$(BOOTLOADER_BIN): $(BOOTSRCFILES)
-	@echo "== Compiling "$@" =="
-	@nasm -fbin boot/boot.s -o $@
+$(BOOTLOADER_BIN): $(BOOTSRCFILES) $(KERNEL_BIN)
+	@echo "--> Compiling "$@
+	nasm -fbin -DKSIZE=$(shell du -bB512 $(KERNEL_BIN) | cut -f1) boot/boot.s -o $@
 
 %.o: %.s Makefile
-	@nasm -felf32 $< -o $@
+	nasm -felf32 $< -o $@
 
 %.o: %.c Makefile
-	@$(CC) $(CFLAGS) -DNDEBUG -MMD -MP -MT "$*.d" -std=c99 -c $< -o $@
+	$(CC) $(CFLAGS) -DNDEBUG -MMD -MP -MT "$*.d" -std=c99 -c $< -o $@

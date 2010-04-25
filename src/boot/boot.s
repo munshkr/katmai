@@ -18,7 +18,9 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-%define KSIZE 8
+; KSIZE is kernel binary in sector size. This %define is deprecated because
+; Makefile defines it automatically.
+;%define KSIZE 1
 
 BITS 16           ; We need 16-bit intructions for Real mode
 ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
