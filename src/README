@@ -3,7 +3,6 @@
 There is already a Bochs configuration file for NoxPgOS.
 To compile and run simply do:
 
-$ cd src/
 $ make
 $ bochs -q
 
