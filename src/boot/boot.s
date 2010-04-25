@@ -90,6 +90,9 @@ kernel_segments:
 %include "boot/gdt.s"
 
 
+; If NASM throws "TIMES value is negative" here, it means we have
+; stepped over our 512 bytes limit. We should delete code to make it
+; smaller, or write a second stage bootloader.
 times 510-($-$$) db 0    ; Fill up the file with zeros
 
-dw 0AA55h           ; Boot sector identifyer; Fat12 Bootloader
+dw 0AA55h           ; Boot sector identifier

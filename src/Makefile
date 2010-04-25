@@ -40,7 +40,6 @@ all: $(DISKIMAGE)
 
 $(DISKIMAGE): $(KERNEL_BIN) $(BOOTLOADER_BIN)
 	@echo "--> Building disk image "$@
-	@echo "Remember to check if KSIZE is the same as kernel binary size!"
 	dd if=$(BOOTLOADER_BIN) of=$(DISKIMAGE) bs=512 count=1
 	dd if=$(KERNEL_BIN) of=$(DISKIMAGE) bs=512 seek=1
 
@@ -49,7 +48,7 @@ clean:
 
 dist:
 	@echo "--> Creating tarball "$(TAR_FILE)
-	@tar czf $(TAR_FILE) $(ALLFILES)
+	tar czf $(TAR_FILE) $(ALLFILES)
 
 todolist:
 	-@for file in $(ALLFILES); do fgrep -H -e TODO -e FIXME $$file; done; true
@@ -58,7 +57,7 @@ todolist:
 -include $(DEPFILES)
 
 $(KERNEL_BIN): $(OBJFILES)
-	@echo "--> Compiling "$@
+	@echo "--> Linking "$@
 	$(LD) $(LDFLAGS) -o $@ $(OBJFILES)
 
 # TODO Calculate kernel binary size and pass it to nasm line in
@@ -69,7 +68,9 @@ $(BOOTLOADER_BIN): $(BOOTSRCFILES) $(KERNEL_BIN)
 	nasm -fbin -DKSIZE=$(shell du -bB512 $(KERNEL_BIN) | cut -f1) boot/boot.s -o $@
 
 %.o: %.s Makefile
+	@echo "--> Compiling "$@
 	nasm -felf32 $< -o $@
 
 %.o: %.c Makefile
+	@echo "--> Compiling "$@
 	$(CC) $(CFLAGS) -DNDEBUG -MMD -MP -MT "$*.d" -std=c99 -c $< -o $@
