@@ -420,7 +420,7 @@ log: /dev/null
 #          spit out thousands per second.
 #
 # For events of each level, you can choose to crash, report, or ignore.
-# TODO: allow choice based on the facility: e.g. crash on panics from
+# TO-DO: allow choice based on the facility: e.g. crash on panics from
 #       everything except the cdrom, and only report those.
 #
 # If you are experiencing many panics, it can be helpful to change

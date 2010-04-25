@@ -1,20 +1,19 @@
 #ifndef __VIDEO_H__
 #define __VIDEO_H__
 
-/* Simple putc */
-int x = 0;
-int y = 0; /* Our global 'x' and 'y' */
-char color = 0; /* Our global color attribute */
+unsigned int x = 0;
+unsigned int y = 0;
+unsigned char color = 0x07;
 
 void putc(unsigned char c) {
-	char *vidmem = (char*) 0xb8000; /* pointer to video memory */
-	int pos = (y * 2) + x; /* Get the position */
+  unsigned char *vidmem = (unsigned char*) 0xb8000; /* pointer to video memory */
+	unsigned int pos = (y * 2) + x; /* Get the position */
 	vidmem[pos] = c; /* print the character */
 	vidmem[pos++] = color; /* Set the color attribute */
 }
 
-int puts(char *message) {
-	int length;
+int puts(unsigned char *message) {
+	unsigned int length;
 	while(*message) {
 		putc(*message++);
 		length++;

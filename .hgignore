@@ -1,1 +1,1 @@
-src/.*(\.o|\.bin|\.img)$
+src/.*(\.o|\.bin|\.img|\.d)$
