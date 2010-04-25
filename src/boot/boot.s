@@ -25,48 +25,54 @@
 BITS 16           ; We need 16-bit intructions for Real mode
 ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 
-jmp word load_kernel      ; Load the OS Kernel
+jmp start
 
-%include "boot/fat12.s"
+; == SECTION .data ==
+drive db 0        ; Stores floppy drive
+%include "boot/gdt.s"
 
-;----------Bootsector Code----------;
+; == Bootsector Code ==
   
-load_kernel:
-  jmp read_disk         ; Load the OS into memory
-	; TODO detect_memory
-  ;call detect_memory    ; Get Memory Map
-  call enableA20        ; Enable A20 line for 32bit addresses
-  jmp enter_pm          ; Enter Protected Mode
-  
+start:
+
+; === Load Kernel into memory ===
+
 read_disk:
-  mov ah, 0       ; RESET-command
-  int 13h       ; Call interrupt 13h
+  mov ah, 0         ; RESET-command
+  int 13h           ; Call interrupt 13h
   mov [drive], dl   ; Store boot disk
-  or ah, ah       ; Check for error code
-  jnz read_disk    ; Try again if ah != 0
-  mov ax, 0
-  mov ax, 0             
+  or ah, ah         ; Check for error code
+  jnz read_disk     ; Try again if ah != 0
+
+  xor ax, ax
   mov es, ax            
-  mov bx, 0x1000  ; Destination address = 0000:1000
+  mov bx, 01000h    ; Destination address = 0000:1000
 
   mov ah, 02h       ; READ SECTOR-command
-  mov al, KSIZE    ; Number of sectors to read
+  mov al, KSIZE     ; Number of sectors to read
   mov dl, [drive]   ; Load boot disk
   mov ch, 0         ; Cylinder = 0
   mov cl, 2         ; Starting Sector = 3
   mov dh, 0         ; Head = 1
-  int 13h     ; Call interrupt 13h
+  int 13h           ; Call interrupt 13h
   or ah, ah         ; Check for error code
-  jnz load_kernel   ; Try again if ah != 0
-  cli         ; Disable interrupts, we want to be alone
+  jnz read_disk     ; Try again if ah != 0
+
+
+; TODO === Obtain memory map ===
+;%include "boot/mmap.s"
+
+; === Enable A20 line ===
+%include "boot/a20.s"
+
+; === Enter Protected Mode ===
 
 enter_pm:
+  cli               ; Disable interrupts, we want to be alone
   xor ax, ax        ; Clear AX register
   mov ds, ax        ; Set DS-register to 0 - used by lgdt
 
   lgdt [gdt_desc]   ; Load the GDT descriptor 
-  
-;----------Entering Protected Mode----------;
     
   mov eax, cr0      ; Copy the contents of CR0 into EAX
   or eax, 1         ; Set bit 0     (0xFE = Real Mode)
@@ -85,9 +91,6 @@ kernel_segments:
   
   jmp 08h:01000h    ; Jump to section 08h (code), offset 01000h
   
-
-%include "boot/a20.s"
-%include "boot/gdt.s"
 
 
 ; If NASM throws "TIMES value is negative" here, it means we have

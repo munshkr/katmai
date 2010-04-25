@@ -38,7 +38,4 @@ dw 2             ; Heads per cylinder (double sided)
 dd 0             ; Hidden sectors
 dd 0             ; Total sectors (unused, see Number of sectors)
 
-; == Extended BIOS parameter block ==
-drive db 0       ; Used to store boot device
-
 ; Rest of header ignored...

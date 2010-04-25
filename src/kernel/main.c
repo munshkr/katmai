@@ -2,7 +2,7 @@
 #include "video.h"
 
 void kmain(void) {
-	//puts("Hello, world!");
+	puts("Hello, world!");
   //putc('a');
   //for (;;);
 }
