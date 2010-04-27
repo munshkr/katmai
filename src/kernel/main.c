@@ -10,4 +10,6 @@ void kmain(void) {
     puts(n);
   }
   puts("testing scrolling...");
+  clear();
+  puts("and clearing screen!");
 }

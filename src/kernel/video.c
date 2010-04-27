@@ -20,6 +20,7 @@
 */
 
 #include "video.h"
+#include "x86.h"
 
 
 /* global cursor */
@@ -40,6 +41,7 @@ void clear(void) {
 }
 
 void scroll(void) {
+  debug();
   short *pos = (short *) VGA_TEXT_BUFFER;
   short *cur_pos = pos + MAX_COLS;
   for (int row=1; row < MAX_ROWS; ++row) {

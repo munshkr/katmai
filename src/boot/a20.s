@@ -11,12 +11,8 @@
 BITS 16
 
 enableA20:
-  ; This subroutine will enable the A20 address line in the keyboard
-  ; controller.  Takes no arguments.  Returns 0 in Eax on success, 
-  ; -1 on failure.  Written for use in 16-bit code, see lines marked
-  ; with 32-BIT for use in 32-bit code.
-
-  pusha
+  ; This routine will enable the A20 address line in the keyboard
+  ; controller.  It will halt processor on failure.
 
   ; Make sure interrupts are disabled
   cli
@@ -34,7 +30,7 @@ enableA20:
   jc .commandWait1
 
   ; Tell the controller we want to read the current status.
-  ; Send the command D0h: read output port.
+  ; Send the command d0h: read output port.
   mov al, 0d0h
   out 64h, al
 
@@ -49,7 +45,7 @@ enableA20:
   xor ax, ax
   in al, 60h
 
-  ; Save the current value of (E)ax
+  ; Save the current value of AX
   push ax
 
   ; Wait for the controller to be ready for a command
@@ -108,7 +104,7 @@ enableA20:
   ; Check the result.  If carry is on, A20 is on.
   jc .success
 
-  ; Should we retry the operation?  If the counter value in Ecx
+  ; Should we retry the operation?  If the counter value in CX
   ; has not reached zero, we will retry
   loop .startAttempt1
 
@@ -145,7 +141,7 @@ enableA20:
   bt ax, 1
   jc .commandWait7
 
-  ; Send the command D0h: read output port.
+  ; Send the command d0h: read output port.
   mov al, 0d0h
   out 64h, al  
 
@@ -172,10 +168,9 @@ enableA20:
   loop .startAttempt2
 
 
-  ; OK, we weren't able to set the A20 address line.  Do you want
-  ; to put an error message here?
-  jmp .fail
-
+  ; OK, we weren't able to set the A20 address line.  Halt!
+  ; TODO Print error message
+  hlt
 
   .warn:
   ; Here you may or may not want to print a warning message about
@@ -184,15 +179,3 @@ enableA20:
 
   .success:
   sti
-  popa
-  xor ax, ax
-  ;ret
-  jmp .end
-
-  .fail:
-  sti
-  popa
-  mov ax, -1
-  ;ret
-
-  .end:
