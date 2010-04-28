@@ -27,25 +27,42 @@ ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 
 jmp start
 
-; == SECTION .data ==
 drive db 0        ; Stores floppy drive
+
+; Messages
+loading:
+  db "== NoxPgOS ==", 13, 10, 0
+read_disk_ok:
+  db "Kernel loaded OK", 13, 10, 0
+read_disk_fail:
+  db "Failed to load kernel!", 13, 10, 0
+
+; Necessary data structures and subroutines
 %include "boot/gdt.s"
+%include "boot/screen.s"
 
 ; == Bootsector Code ==
   
 start:
+  xor ax, ax
+  mov es, ax
+  call bios_clear_screen    ; Clear screen
+
+  mov si, loading
+  call bios_print           ; Print hello message
 
 ; === Load Kernel into memory ===
 
 read_disk:
+  ; TODO Retry thrice only, then halt on failure
   mov ah, 0         ; RESET-command
   int 13h           ; Call interrupt 13h
   mov [drive], dl   ; Store boot disk
   or ah, ah         ; Check for error code
-  jnz read_disk     ; Try again if ah != 0
+  jnz .fail         ; Try again if ah != 0
 
   xor ax, ax
-  mov es, ax            
+  mov es, ax
   mov bx, 01000h    ; Destination address = 0000:1000
 
   mov ah, 02h       ; READ SECTOR-command
@@ -57,7 +74,16 @@ read_disk:
   int 13h           ; Call interrupt 13h
   or ah, ah         ; Check for error code
   jnz read_disk     ; Try again if ah != 0
+  jmp .done
 
+.fail:
+  mov si, read_disk_fail
+  call bios_print   ; Print error message
+  jmp read_disk     ; and retry
+
+.done:
+  mov si, read_disk_ok
+  call bios_print
 
 ; TODO === Obtain memory map ===
 ;%include "boot/mmap.s"
@@ -68,18 +94,20 @@ read_disk:
 ; === Enter Protected Mode ===
 
 enter_pm:
+  ; TODO Print debug messages
+
   cli               ; Disable interrupts, we want to be alone
   xor ax, ax        ; Clear AX register
   mov ds, ax        ; Set DS-register to 0 - used by lgdt
 
   lgdt [gdt_desc]   ; Load the GDT descriptor 
-    
+
   mov eax, cr0      ; Copy the contents of CR0 into EAX
   or eax, 1         ; Set bit 0     (0xFE = Real Mode)
   mov cr0, eax      ; Copy the contents of EAX into CR0
-  
+
   jmp 08h:kernel_segments ; Jump to code segment, offset kernel_segments
-  
+
 
 BITS 32           ; We now need 32-bit instructions
 
@@ -88,9 +116,9 @@ kernel_segments:
   mov ds, ax        ; Move a valid data segment into the data segment register
   mov ss, ax        ; Move a valid data segment into the stack segment register
   mov esp, 090000h  ; Move the stack pointer to 090000h
-  
+
   jmp 08h:01000h    ; Jump to section 08h (code), offset 01000h
-  
+
 
 
 ; If NASM throws "TIMES value is negative" here, it means we have

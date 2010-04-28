@@ -11,6 +11,8 @@
 BITS 16
 
 enableA20:
+  ; TODO Print debug messages
+
   ; This routine will enable the A20 address line in the keyboard
   ; controller.  It will halt processor on failure.
 
