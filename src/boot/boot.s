@@ -30,31 +30,26 @@ jmp start
 drive db 0        ; Stores floppy drive
 
 ; Messages
-loading:
-  db "== NoxPgOS ==", 13, 10, 0
-read_disk_ok:
-  db "Kernel loaded OK", 13, 10, 0
-read_disk_fail:
-  db "Failed to load kernel!", 13, 10, 0
+loading        db "Loading kernel...", 13, 10, 0
+read_disk_fail db "Failed to load kernel!", 13, 10, 0
 
-; Necessary data structures and subroutines
-%include "boot/gdt.s"
+; Necessary subroutines and data structures
 %include "boot/screen.s"
+%include "boot/a20.s"
+%include "boot/gdt.s"
+
 
 ; == Bootsector Code ==
   
 start:
-  xor ax, ax
-  mov es, ax
-  call bios_clear_screen    ; Clear screen
-
-  mov si, loading
-  call bios_print           ; Print hello message
+  ;CLEAR                     ; Clear screen
+  PRINT loading           ; Print hello message
 
 ; === Load Kernel into memory ===
 
 read_disk:
   ; TODO Retry thrice only, then halt on failure
+
   mov ah, 0         ; RESET-command
   int 13h           ; Call interrupt 13h
   mov [drive], dl   ; Store boot disk
@@ -77,24 +72,22 @@ read_disk:
   jmp .done
 
 .fail:
-  mov si, read_disk_fail
-  call bios_print   ; Print error message
-  jmp read_disk     ; and retry
+  PRINT read_disk_fail  ; Print error message
+  jmp read_disk         ; and retry
 
 .done:
-  mov si, read_disk_ok
-  call bios_print
 
-; TODO === Obtain memory map ===
-;%include "boot/mmap.s"
+; === Detecting memory ===
 
-; === Enable A20 line ===
-%include "boot/a20.s"
+  ; TODO Obtain memory map, among other things
+  ;%include "boot/mmap.s"
 
 ; === Enter Protected Mode ===
 
 enter_pm:
   ; TODO Print debug messages
+
+  call enable_a20   ; Enable A20 line for 32-bit addressing
 
   cli               ; Disable interrupts, we want to be alone
   xor ax, ax        ; Clear AX register
@@ -109,10 +102,10 @@ enter_pm:
   jmp 08h:kernel_segments ; Jump to code segment, offset kernel_segments
 
 
-BITS 32           ; We now need 32-bit instructions
+BITS 32             ; We now need 32-bit instructions
 
 kernel_segments:
-  mov ax, 10h       ; Save data segment identifyer
+  mov ax, 10h       ; Save data segment identifier
   mov ds, ax        ; Move a valid data segment into the data segment register
   mov ss, ax        ; Move a valid data segment into the stack segment register
   mov esp, 090000h  ; Move the stack pointer to 090000h

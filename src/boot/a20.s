@@ -8,16 +8,15 @@
 ; Contact me at jamesamc@yahoo.com about any bugs or problems.
 ;
 
-BITS 16
+m_a20_fail  db "Failed to enable A20 line! Halted.", 13, 10, 0
+m_a20_warn  db "Used non-standard method for enabling A20 line.", 13, 10, 0
 
-enableA20:
-  ; TODO Print debug messages
-
+enable_a20:
   ; This routine will enable the A20 address line in the keyboard
   ; controller.  It will halt processor on failure.
 
-  ; Make sure interrupts are disabled
-  cli
+  pusha
+  cli       ; Make sure interrupts are disabled
 
   ; Keep a counter so that we can make up to 5 attempts to turn
   ; on A20 if necessary
@@ -171,13 +170,16 @@ enableA20:
 
 
   ; OK, we weren't able to set the A20 address line.  Halt!
-  ; TODO Print error message
+  PRINT m_a20_fail
   hlt
 
   .warn:
   ; Here you may or may not want to print a warning message about
   ; the fact that we had to use the nonstandard alternate enabling
   ; method
+  PRINT m_a20_warn
 
   .success:
-  sti
+  sti     ; Enable interrupts
+  popa
+  ret

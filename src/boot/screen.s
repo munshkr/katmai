@@ -1,5 +1,5 @@
 ;
-; screen.s ~ BIOS screen macros
+; screen.s ~ BIOS screen subroutines
 ;
 ; Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
 ;                Hernán Rodriguez Colmeiro <colmeiro@gmail.com>
@@ -18,8 +18,20 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-bios_row db 0     ; Stores current cursor row
+%macro PRINT 1
+  mov si, %1
+  call bios_print
+%endmacro
 
+%macro CLEAR 0
+  call bios_clear_screen
+%endmacro
+
+
+; We don't care about this now
+;bios_row db 0           ; Stores current cursor row
+
+; To be deleted - Not needed here
 bios_clear_screen:
   pusha
   mov ah, 0x06    ; BIOS: Clear the screen
@@ -31,7 +43,7 @@ bios_clear_screen:
   xor dx, dx      ; at (0, 0)
   mov bh, dh      ; page=0
   int 0x10
-  mov byte [cs:bios_row], 0  ; update variable
+  ;mov byte [cs:bios_row], 0  ; update variable
   popa
   ret
 
@@ -40,9 +52,9 @@ bios_print:
   pusha
   mov ah, 0xe     ; BIOS: Write char and attr at cursor pos
   mov bx, 0x7     ; page=0, attributes is lgrey/black.
-  mov dl, 1       ; first colum (forced)
-  mov dh, [cs:bios_row]
-  inc byte [cs:bios_row]
+  ;mov dl, 1       ; first colum (forced)
+  ;mov dh, [cs:bios_row]
+  ;inc byte [cs:bios_row]
 .loop:
   lodsb
   or al, al
