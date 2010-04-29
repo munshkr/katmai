@@ -27,7 +27,9 @@ ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 
 jmp start
 
+; Data
 drive db 0        ; Stores floppy drive
+total_ram dw 0    ; Physical RAM available
 
 ; Messages
 loading        db "Loading kernel...", 13, 10, 0
@@ -37,6 +39,7 @@ read_disk_fail db "Failed to load kernel!", 13, 10, 0
 %include "boot/screen.s"
 %include "boot/a20.s"
 %include "boot/gdt.s"
+%include "boot/mmap.s"
 
 
 ; == Bootsector Code ==
@@ -77,10 +80,6 @@ read_disk:
 
 .done:
 
-; === Detecting memory ===
-
-  ; TODO Obtain memory map, among other things
-  ;%include "boot/mmap.s"
 
 ; === Enter Protected Mode ===
 
@@ -109,6 +108,10 @@ kernel_segments:
   mov ds, ax        ; Move a valid data segment into the data segment register
   mov ss, ax        ; Move a valid data segment into the stack segment register
   mov esp, 090000h  ; Move the stack pointer to 090000h
+
+  call do_e820      ; Detect available RAM
+  mov ax, [total_ram]
+  xchg bx, bx
 
   jmp 08h:01000h    ; Jump to section 08h (code), offset 01000h
 
