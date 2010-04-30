@@ -1,5 +1,5 @@
 ;
-; boot.s ~ NoxPgOS Bootloader
+; boot.s ~ Bootloader's first stage
 ;
 ; Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
 ;                Hernán Rodriguez Colmeiro <colmeiro@gmail.com>
@@ -18,108 +18,65 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-; KSIZE is kernel binary in sector size. This %define is deprecated because
-; Makefile defines it automatically.
-;%define KSIZE 1
-
 BITS 16           ; We need 16-bit intructions for Real mode
 ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 
+
+; == Header and data section ==
+
 jmp start
 
-; Data
-drive db 0        ; Stores floppy drive
-total_ram dw 0    ; Physical RAM available
+; NOTE: This header is based on info taken from Wikipedia's article
+; about FAT filesystem, and is intended to be stored in a 3 1/2 floppy.
+
+; === BIOS parameter block and other data ===
+
+bpbOEMIdentifier:     db "NoxPgOS "     ; 8 bytes
+bpbBytesPerSector:    dw 512
+bpbSectorsPerCluster: db 1
+bpbReservedSectors:   dw 1              ; Only bootsector
+bpbNumberOfFATs:      db 2
+bpbRootEntries:       dw 224
+bpbNumberOfSectors:   dw 2880
+bpbMediaDescriptor:   db 0xf0           ; 1.44MB diskette
+bpbSectorsPerFAT:     dw 9
+bpbSectorsPerTrack:   dw 18
+bpbHeadsPerCylinder:  dw 2              ; Double sided
+bpbHiddenSectors:     dd 0
+bpbTotalSectorsBig:   dd 0              ; Unused, see bpbNumberOfSectors
+
+; === Extended BIOS parameter block ===
+
+bpbDriveNumber:       db 0              ; Physical Drive number
+bpbReserved:          db 0              ; Unused
+bpbExtBootSignature:  db 0x29           ; Extended boot signature
+bpbSerialNumber:      dd 0              ; Nobody cares...
+bpbVolumeLabel:       db "NoxPgOS    "  ; Padded with spaces, 11 bytes
+bpbFileSystem:        db "FAT12   "     ; FAT file system type, padded with spaces, 8 bytes
+
+
+; FAT12 and BIOS screen subroutines
+%include "boot/fat12.s"
+%include "boot/screen.s"
 
 ; Messages
-loading        db "Loading kernel...", 13, 10, 0
-read_disk_fail db "Failed to load kernel!", 13, 10, 0
-
-; Necessary subroutines and data structures
-%include "boot/screen.s"
-%include "boot/a20.s"
-%include "boot/gdt.s"
-%include "boot/mmap.s"
-
+loading        db "Loading second-stage bootloader...", 13, 10, 0
+read_disk_fail db "Failed to read sectors!", 13, 10, 0
 
 ; == Bootsector Code ==
   
 start:
-  ;CLEAR                     ; Clear screen
+  ;CLEAR                   ; Clear screen
   PRINT loading           ; Print hello message
 
-; === Load Kernel into memory ===
+; === Load STAGE2.SYS file into memory ===
 
-read_disk:
-  ; TODO Retry thrice only, then halt on failure
-
-  mov ah, 0         ; RESET-command
-  int 13h           ; Call interrupt 13h
-  mov [drive], dl   ; Store boot disk
-  or ah, ah         ; Check for error code
-  jnz .fail         ; Try again if ah != 0
-
-  xor ax, ax
-  mov es, ax
-  mov bx, 01000h    ; Destination address = 0000:1000
-
-  mov ah, 02h       ; READ SECTOR-command
-  mov al, KSIZE     ; Number of sectors to read
-  mov dl, [drive]   ; Load boot disk
-  mov ch, 0         ; Cylinder = 0
-  mov cl, 2         ; Starting Sector = 3
-  mov dh, 0         ; Head = 1
-  int 13h           ; Call interrupt 13h
-  or ah, ah         ; Check for error code
-  jnz read_disk     ; Try again if ah != 0
-  jmp .done
-
-.fail:
-  PRINT read_disk_fail  ; Print error message
-  jmp read_disk         ; and retry
-
-.done:
-
-
-; === Enter Protected Mode ===
-
-enter_pm:
-  ; TODO Print debug messages
-
-  call enable_a20   ; Enable A20 line for 32-bit addressing
-
-  cli               ; Disable interrupts, we want to be alone
-  xor ax, ax        ; Clear AX register
-  mov ds, ax        ; Set DS-register to 0 - used by lgdt
-
-  lgdt [gdt_desc]   ; Load the GDT descriptor 
-
-  mov eax, cr0      ; Copy the contents of CR0 into EAX
-  or eax, 1         ; Set bit 0     (0xFE = Real Mode)
-  mov cr0, eax      ; Copy the contents of EAX into CR0
-
-  jmp 08h:kernel_segments ; Jump to code segment, offset kernel_segments
-
-
-BITS 32             ; We now need 32-bit instructions
-
-kernel_segments:
-  mov ax, 10h       ; Save data segment identifier
-  mov ds, ax        ; Move a valid data segment into the data segment register
-  mov ss, ax        ; Move a valid data segment into the stack segment register
-  mov esp, 090000h  ; Move the stack pointer to 090000h
-
-  call do_e820      ; Detect available RAM
-  mov ax, [total_ram]
-  xchg bx, bx
-
-  jmp 08h:01000h    ; Jump to section 08h (code), offset 01000h
-
+; TODO Look for STAGE2.SYS in FAT, load it in 0x1000 and jump there
 
 
 ; If NASM throws "TIMES value is negative" here, it means we have
 ; stepped over our 512 bytes limit. We should delete code to make it
-; smaller, or write a second stage bootloader.
+; smaller.
 times 510-($-$$) db 0    ; Fill up the file with zeros
 
 dw 0AA55h           ; Boot sector identifier

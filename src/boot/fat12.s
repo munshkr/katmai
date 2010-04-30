@@ -18,24 +18,10 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-; NOTE: This header is based on info taken from Wikipedia's article
-; about FAT filesystem, and is intended to be stored in a 3 1/2 floppy.
+bios_reset:
+  mov   ah, 0         ; Reset floppy disk function
+  mov   dl, 0         ; Drive 0 is floppy drive
+  int   0x13          ; Call BIOS routine
+  jc    bios_reset    ; If Carry Flag (CF) is set, there was an error. Try again
 
-
-; == BIOS parameter block ==
-
-db "NoxPgOS", 0  ; OEM Identifier
-dw 512           ; Bytes per sector
-db 1             ; Sectors per cluster
-dw 1             ; Reserved sectors (only bootsector)
-db 2             ; Number of FATs
-dw 224           ; Root entries
-dw 2880          ; Number of sectors
-db 0f0h           ; Media descriptor
-dw 9             ; Sectors per FAT
-dw 18            ; Sectors per track
-dw 2             ; Heads per cylinder (double sided)
-dd 0             ; Hidden sectors
-dd 0             ; Total sectors (unused, see Number of sectors)
-
-; Rest of header ignored...
+; TODO Read files routines
