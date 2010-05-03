@@ -26,41 +26,12 @@ ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 
 jmp start
 
-; NOTE: This header is based on info taken from Wikipedia's article
-; about FAT filesystem, and is intended to be stored in a 3 1/2 floppy.
-
-; === BIOS parameter block and other data ===
-
-bpbOEMIdentifier:     db "NoxPgOS "     ; 8 bytes
-bpbBytesPerSector:    dw 512
-bpbSectorsPerCluster: db 1
-bpbReservedSectors:   dw 1              ; Only bootsector
-bpbNumberOfFATs:      db 2
-bpbRootEntries:       dw 224
-bpbNumberOfSectors:   dw 2880
-bpbMediaDescriptor:   db 0xf0           ; 1.44MB diskette
-bpbSectorsPerFAT:     dw 9
-bpbSectorsPerTrack:   dw 18
-bpbHeadsPerCylinder:  dw 2              ; Double sided
-bpbHiddenSectors:     dd 0
-bpbTotalSectorsBig:   dd 0              ; Unused, see bpbNumberOfSectors
-
-; === Extended BIOS parameter block ===
-
-bpbDriveNumber:       db 0              ; Physical Drive number
-bpbReserved:          db 0              ; Unused
-bpbExtBootSignature:  db 0x29           ; Extended boot signature
-bpbSerialNumber:      dd 0              ; Nobody cares...
-bpbVolumeLabel:       db "NoxPgOS    "  ; Padded with spaces, 11 bytes
-bpbFileSystem:        db "FAT12   "     ; FAT file system type, padded with spaces, 8 bytes
-
-
-; FAT12 and BIOS screen subroutines
-%include "boot/fat12.s"
+; BIOS screen subroutines
 %include "boot/screen.s"
 
 ; Messages
 loading        db "Loading second-stage bootloader...", 13, 10, 0
+loading_kernel db "Loading kernel...", 13, 10, 0
 read_disk_fail db "Failed to read sectors!", 13, 10, 0
 
 ; == Bootsector Code ==

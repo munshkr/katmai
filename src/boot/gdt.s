@@ -18,8 +18,6 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-BITS 16
-
 ;----------Global Descriptor Table----------;
 
 gdt:          ; Address for the GDT

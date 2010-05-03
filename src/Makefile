@@ -18,7 +18,8 @@ OBJFILES += $(patsubst %.c,%.o,$(SRCFILES))
 
 DEPFILES := $(patsubst %.c,%.d,$(SRCFILES))
 
-BOOTLOADER_BIN := boot.bin
+BOOT_BIN := boot.bin
+STAGE2_BIN := stage2.bin
 KERNEL_BIN := kernel.bin
 DISKIMAGE := diskette.img
 TAR_FILE := noxpgos.tar.gz
@@ -36,15 +37,20 @@ LDFLAGS := -static -m elf_i386 -b elf32-i386 --oformat binary \
 .PHONY: all clean dist todolist
 
 
+STAGE2_SIZE = $(shell du -bB512 $(STAGE2_BIN) | cut -f1)
+KERNEL_SIZE = $(shell du -bB512 $(KERNEL_BIN) | cut -f1)
+
+
 all: $(DISKIMAGE)
 
-$(DISKIMAGE): $(KERNEL_BIN) $(BOOTLOADER_BIN)
+$(DISKIMAGE): $(KERNEL_BIN) $(STAGE2_BIN) $(BOOT_BIN)
 	@echo ">> Building disk image: "$@
-	dd if=$(BOOTLOADER_BIN) of=$(DISKIMAGE) bs=512 count=1 2>/dev/null
-	dd if=$(KERNEL_BIN) of=$(DISKIMAGE) bs=512 seek=1 2>/dev/null
+	dd if=$(BOOT_BIN) of=$(DISKIMAGE) bs=512 count=1 2>/dev/null
+	dd if=$(STAGE2_BIN) of=$(DISKIMAGE) bs=512 seek=1 2>/dev/null
+	dd if=$(KERNEL_BIN) of=$(DISKIMAGE) bs=512 seek=$(shell echo $(STAGE2_SIZE)+1 | bc) 2>/dev/null
 
 clean:
-	-@$(RM) $(wildcard $(OBJFILES) $(DEPFILES) $(BOOTLOADER_BIN) $(KERNEL_BIN) $(DISKIMAGE))
+	-@$(RM) $(wildcard $(OBJFILES) $(DEPFILES) $(BOOT_BIN) $(STAGE2_BIN) $(KERNEL_BIN) $(DISKIMAGE))
 
 dist:
 	@echo ">> Making tarball: "$(TAR_FILE)
@@ -60,12 +66,13 @@ $(KERNEL_BIN): $(OBJFILES)
 	@echo ">> Linking: "$@
 	$(LD) $(LDFLAGS) -o $@ $(OBJFILES)
 
-# TODO Calculate kernel binary size and pass it to nasm line in
-# bootloader so it knows exactly how much sectors it needs to read 
-# from floppy.
-$(BOOTLOADER_BIN): $(BOOTSRCFILES) $(KERNEL_BIN)
+$(STAGE2_BIN): $(BOOTSRCFILES)
 	@echo ">> Compiling: "$@
-	nasm -fbin -DKSIZE=$(shell du -bB512 $(KERNEL_BIN) | cut -f1) boot/boot.s -o $@
+	nasm -fbin boot/stage2.s -o $@
+
+$(BOOT_BIN): $(BOOTSRCFILES) $(KERNEL_BIN) $(STAGE2_BIN)
+	@echo ">> Compiling: "$@
+	nasm -fbin -DKSIZE=$(KERNEL_SIZE) -DS2SIZE=$(STAGE2_SIZE) boot/boot.s -o $@
 
 %.o: %.s Makefile
 	@echo ">> Compiling: "$@

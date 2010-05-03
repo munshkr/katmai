@@ -18,17 +18,17 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+BITS 16
+
 
 ; Physical RAM available
 total_ram dw 0
 
 
-;%include "boot/fat12.s"
-;%include "boot/mmap.s"
-;%include "boot/a20.s"
-;%include "boot/gdt.s"
+%include "boot/mmap.s"
+%include "boot/a20.s"
+%include "boot/gdt.s"
 ;%include "boot/screen.s"
-
 
 
 ; === Enter Protected Mode ===

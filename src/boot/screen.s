@@ -28,9 +28,6 @@
 %endmacro
 
 
-; We don't care about this now
-;bios_row db 0           ; Stores current cursor row
-
 ; To be deleted - Not needed here
 bios_clear_screen:
   pusha
