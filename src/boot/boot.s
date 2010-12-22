@@ -28,6 +28,9 @@ jmp start
 
 ; BIOS screen subroutines
 %include "boot/screen.s"
+%include "boot/screen.mac"
+%include "boot/disk.s"
+
 
 ; Messages
 loading        db "Loading second-stage bootloader...", 13, 10, 0
@@ -40,10 +43,13 @@ start:
   ;CLEAR                   ; Clear screen
   PRINT loading           ; Print hello message
 
-; === Load STAGE2.SYS file into memory ===
+; === Load second-stage at 0x1000 (usable low-memory) ===
 
-; TODO Look for STAGE2.SYS in FAT, load it in 0x1000 and jump there
+; TODO
 
+
+  cli
+  hlt
 
 ; If NASM throws "TIMES value is negative" here, it means we have
 ; stepped over our 512 bytes limit. We should delete code to make it

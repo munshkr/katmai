@@ -25,10 +25,12 @@ BITS 16
 total_ram dw 0
 
 
+%include "boot/screen.s"
+%include "boot/screen.mac"
+
 %include "boot/mmap.s"
 %include "boot/a20.s"
 %include "boot/gdt.s"
-;%include "boot/screen.s"
 
 
 ; === Enter Protected Mode ===
@@ -37,6 +39,9 @@ enter_pm:
   ; TODO Print debug messages
 
   call enable_a20   ; Enable A20 line for 32-bit addressing
+
+  ; TODO Load kernel at 0x100000 (start of high-memory)
+  ; ...
 
   cli               ; Disable interrupts, we want to be alone
   xor ax, ax        ; Clear AX register

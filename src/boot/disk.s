@@ -18,6 +18,7 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+
 bios_read_disk:
   ; TODO Retry thrice only, then return -1 in AX on failure.
 
@@ -32,7 +33,7 @@ bios_read_disk:
   mov bx, 01000h    ; destination address = 0000:1000
 
   mov ah, 02h       ; READ-SECTOR command
-  mov al, ksize     ; Number of sectors to read
+  mov al, KSIZE     ; Number of sectors to read
   mov dl, 0         ; Drive 0 is floppy drive
   mov ch, 0         ; Cylinder = 0
   mov cl, 2         ; Starting sector = 3
