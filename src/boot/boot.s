@@ -2,7 +2,7 @@
 ; boot.s ~ Bootloader's first stage
 ;
 ; Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
-;                Hernán Rodriguez Colmeiro <colmeiro@gmail.com>
+;                Patricio Reboratti <darthpolly@gmail.com>
 ;
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 ; == Header and data section ==
 
 jmp start
+# TODO See if jmp 0x0000:start is needed
 
 ; BIOS screen subroutines
 %include "boot/screen.s"

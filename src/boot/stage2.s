@@ -2,7 +2,7 @@
 ; stage2.s ~ Bootloader's second stage
 ;
 ; Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
-;                Hernán Rodriguez Colmeiro <colmeiro@gmail.com>
+;                Patricio Reboratti <darthpolly@gmail.com>
 ;
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
