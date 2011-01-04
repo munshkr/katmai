@@ -42,12 +42,13 @@ stage2_init db "Second-stage loaded!", 13, 10, 0
 start:
   call enable_a20   ; Enable A20 line for 32-bit addressing
 
+  ; TODO Switch to Unreal mode
+
   ; TODO Load kernel at 0x100000 (start of high-memory)
-  ; ...
+
 
 enter_pm:
   ; TODO Print debug messages
-
 
   CLEAR
   PRINT stage2_init
