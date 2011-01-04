@@ -46,11 +46,24 @@ start:
 
 ; === Load second-stage at 0x1000 (usable low-memory) ===
 
-; TODO
+  push 2
+  push 0
+  push 0x1000
+  push S2SIZE
+  call read_disk
+  add esi, 8
 
+  or ax, ax
+  jnz .readerror
 
+  xchg bx, bx
+  jmp 0x0:0x1000
+
+.readerror:
+  PRINT read_disk_fail
   cli
   hlt
+
 
 ; If NASM throws "TIMES value is negative" here, it means we have
 ; stepped over our 512 bytes limit. We should delete code to make it

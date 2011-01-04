@@ -19,11 +19,15 @@
 ;
 
 BITS 16
+ORG 0x1000
+
+jmp enter_pm
 
 
 ; Physical RAM available
 total_ram dw 0
 
+stage2_init db "Second-stage loaded!", 13, 10, 0
 
 %include "boot/screen.s"
 %include "boot/screen.mac"
@@ -35,15 +39,19 @@ total_ram dw 0
 
 ; === Enter Protected Mode ===
 
-enter_pm:
-  ; TODO Print debug messages
-
+start:
   call enable_a20   ; Enable A20 line for 32-bit addressing
 
   ; TODO Load kernel at 0x100000 (start of high-memory)
   ; ...
 
-  cli               ; Disable interrupts, we want to be alone
+enter_pm:
+  ; TODO Print debug messages
+
+
+  CLEAR
+  PRINT stage2_init
+
   xor ax, ax        ; Clear AX register
   mov ds, ax        ; Set DS-register to 0 - used by lgdt
 
