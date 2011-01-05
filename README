@@ -1,9 +1,0 @@
-== NoxPgOS ==
-
-There is already a Bochs configuration file for NoxPgOS.
-To compile and run simply do:
-
-$ make
-$ bochs -q
-
-If Bochs was compiled with debugger, it will pause execution at the beginning. Type c to continue booting.
