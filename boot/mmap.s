@@ -18,12 +18,17 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+mmap_entries: dw 0
+mmap_addr:    dw 0x8000
+
 
 do_e820:
   ; Use the INT 0x15, EAX = 0xE820 BIOS function to get a memory map
   ; inputs: es:di -> destination buffer for 24 byte entries
   ; outputs: bp = entry count, trashes all registers except esi
 
+  pusha
+  mov di, mmap_addr         ; set result buffer address
   xor ebx, ebx              ; ebx must be 0 to start
   xor bp, bp                ; keep an entry count in bp
   mov edx, 0x0534D4150      ; Place "SMAP" into edx
@@ -31,6 +36,7 @@ do_e820:
   mov [es:di + 20], dword 1 ; force a valid ACPI 3.X entry
   mov ecx, 24               ; ask for 24 bytes
   int 0x15
+
   jc short .failed          ; carry set on first call means "unsupported function"
   mov edx, 0x0534D4150      ; Some BIOSes apparently trash this register?
   cmp eax, edx              ; on success, eax must have been reset to "SMAP"
@@ -43,6 +49,7 @@ do_e820:
   mov [es:di + 20], dword 1 ; force a valid ACPI 3.X entry
   mov ecx, 24               ; ask for 24 bytes again
   int 0x15
+
   jc short .e820f           ; carry set means "end of list already reached"
   mov edx, 0x0534D4150      ; repair potentially trashed register
 .jmpin:
@@ -61,9 +68,11 @@ do_e820:
   test ebx, ebx             ; if ebx resets to 0, list is complete
   jne short .e820lp
 .e820f:
-  mov [total_ram], bp       ; store the entry count
+  mov [mmap_entries], bp       ; store the entry count
   clc                       ; there is "jc" on end of list to this point, so the carry must be cleared
+  popa
   ret
 .failed:
   stc                       ; "function unsupported" error exit
+  popa
   ret
