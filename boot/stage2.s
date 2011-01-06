@@ -32,8 +32,9 @@ kernel_loaded db "Kernel loaded", 13, 10, 0
 %include "boot/screen.s"
 %include "boot/screen.mac"
 
-%include "boot/mmap.s"
 %include "boot/a20.s"
+%include "boot/unreal.s"
+%include "boot/mmap.s"
 %include "boot/gdt.s"
 
 
@@ -45,11 +46,19 @@ start:
   call enable_a20   
   PRINT a20_enabled
 
-  ; TODO Load kernel at 0x100000 (start of high-memory)
+  call enable_unreal_mode
+  PRINT gone_unreal
 
+  ; test unreal mode
+  ;mov ebx, 0xcafecafe
+  ;mov eax, 0x200000
+  ;mov dword [ds:eax], ebx
+  ;mov ecx, [ds:eax]
 
-enter_pm:
-  ; TODO Print debug messages
+  ; obtain memory map
+  call do_e820
+  xchg bx, bx
+  mov eax, [mmap_entries]
 
   ; TODO load kernel at 0x100000 (start of high-memory, >= 1 Mb)
   ;push [[S2SIZE + 1]]
