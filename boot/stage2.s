@@ -28,6 +28,8 @@ stage2_init db "Running Second-stage", 13, 10, 0
 a20_enabled db "A20 line enabled", 13, 10, 0
 gone_unreal db "Gone Unreal", 13, 10, 0
 kernel_loaded db "Kernel loaded", 13, 10, 0
+mm_failed db "Memory Map function failed", 13, 10, 0
+mm_ready db "Memory Map stored!", 13, 10, 0
 
 %include "boot/screen.s"
 %include "boot/screen.mac"
@@ -42,12 +44,28 @@ start:
   CLEAR
   PRINT stage2_init
 
-  ; enable A20 line and Unreal mode to access 32-bit address
+; === A20 line ===/
   call enable_a20   
   PRINT a20_enabled
+; ===/
 
+; === Go Unreal ===/
   call enable_unreal_mode
   PRINT gone_unreal
+; ===/
+
+; === Memory Map ===/
+  call make_mmap
+  cmp dword [mmap_entries], 0
+  jne .mmap_ok
+
+  PRINT mm_failed
+  jmp $
+
+.mmap_ok:
+  PRINT mm_ready
+; ===/
+
 
   ; test unreal mode
   ;mov ebx, 0xcafecafe
@@ -55,10 +73,6 @@ start:
   ;mov dword [ds:eax], ebx
   ;mov ecx, [ds:eax]
 
-  ; obtain memory map
-  call do_e820
-  xchg bx, bx
-  mov eax, [mmap_entries]
 
   ; TODO load kernel at 0x100000 (start of high-memory, >= 1 Mb)
   ;push [[S2SIZE + 1]]
@@ -67,6 +81,10 @@ start:
   ;push S2SIZE
   ;call read_disk
   ;add esi, 8
+
+.idle:
+  xchg bx, bx
+  jmp .idle
 
 
 ; === Enter Protected Mode ===
