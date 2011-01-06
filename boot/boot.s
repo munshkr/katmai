@@ -56,7 +56,6 @@ start:
   or ax, ax
   jnz .readerror
 
-  xchg bx, bx
   jmp 0x0:0x1000
 
 .readerror:
