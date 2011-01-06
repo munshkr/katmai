@@ -21,13 +21,13 @@
 BITS 16
 ORG 0x1000
 
-jmp enter_pm
+jmp start
 
 
-; Physical RAM available
-total_ram dw 0
-
-stage2_init db "Second-stage loaded!", 13, 10, 0
+stage2_init db "Running Second-stage", 13, 10, 0
+a20_enabled db "A20 line enabled", 13, 10, 0
+gone_unreal db "Gone Unreal", 13, 10, 0
+kernel_loaded db "Kernel loaded", 13, 10, 0
 
 %include "boot/screen.s"
 %include "boot/screen.mac"
@@ -37,12 +37,13 @@ stage2_init db "Second-stage loaded!", 13, 10, 0
 %include "boot/gdt.s"
 
 
-; === Enter Protected Mode ===
-
 start:
-  call enable_a20   ; Enable A20 line for 32-bit addressing
+  CLEAR
+  PRINT stage2_init
 
-  ; TODO Switch to Unreal mode
+  ; enable A20 line and Unreal mode to access 32-bit address
+  call enable_a20   
+  PRINT a20_enabled
 
   ; TODO Load kernel at 0x100000 (start of high-memory)
 
@@ -50,9 +51,18 @@ start:
 enter_pm:
   ; TODO Print debug messages
 
-  CLEAR
-  PRINT stage2_init
+  ; TODO load kernel at 0x100000 (start of high-memory, >= 1 Mb)
+  ;push [[S2SIZE + 1]]
+  ;push 0
+  ;push 0x1000
+  ;push S2SIZE
+  ;call read_disk
+  ;add esi, 8
 
+
+; === Enter Protected Mode ===
+
+enter_pm:
   xor ax, ax        ; Clear AX register
   mov ds, ax        ; Set DS-register to 0 - used by lgdt
 
@@ -72,9 +82,5 @@ kernel_segments:
   mov ds, ax        ; Move a valid data segment into the data segment register
   mov ss, ax        ; Move a valid data segment into the stack segment register
   mov esp, 0x90000  ; Move the stack pointer to 090000h
-
-  call do_e820      ; Detect available RAM
-  mov ax, [total_ram]
-  xchg bx, bx
 
   jmp 08h:01000h    ; Jump to section 08h (code), offset 01000h
