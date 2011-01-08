@@ -51,7 +51,7 @@ start:
   push 0x1000
   push S2SIZE
   call read_disk
-  add esi, 8
+  add esp, 8
 
   or ax, ax
   jnz .readerror
