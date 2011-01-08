@@ -37,6 +37,7 @@ mm_ready db "Memory Map stored!", 13, 10, 0
 %include "boot/a20.s"
 %include "boot/unreal.s"
 %include "boot/mmap.s"
+%include "boot/disk.s"
 %include "boot/gdt.s"
 
 

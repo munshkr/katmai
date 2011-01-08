@@ -42,6 +42,9 @@ head: dw 0
 track: dw 0
 sec: dw 0
 
+read_disk_fail db "Failed to read sectors!", 13, 10, 0
+
+
 read_disk:
   push bp           ; set up stack frame
   mov bp, sp

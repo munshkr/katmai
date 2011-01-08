@@ -25,7 +25,7 @@ ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 ; == Header and data section ==
 
 jmp start
-# TODO See if jmp 0x0000:start is needed
+
 
 ; BIOS screen subroutines
 %include "boot/screen.s"
@@ -35,8 +35,6 @@ jmp start
 
 ; Messages
 loading        db "Loading second-stage bootloader...", 13, 10, 0
-loading_kernel db "Loading kernel...", 13, 10, 0
-read_disk_fail db "Failed to read sectors!", 13, 10, 0
 
 ; == Bootsector Code ==
   
