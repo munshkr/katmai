@@ -48,7 +48,7 @@ read_disk_fail db "Failed to read sectors!", 13, 10, 0
 read_disk:
   push bp
   mov bp, sp
-  pusha
+  pushad
 
   ; Convert logical sector number to physical (sector:cylinder:head)
 
@@ -102,12 +102,12 @@ read_disk:
   jmp .reset            ; and retry
 
 .done:
-  popa
+  popad
   pop bp
   ret
 
 
-; read_disk32(start_sector, dest_hi, dest_lo, count)
+; read_disk32(uint16 start_sector, uint32 destination, uint16 count)
 ;
 ; Read `n` sectors from the floppy drive to a destination
 ; in high-memory (above 1Mb).
@@ -121,8 +121,7 @@ read_disk:
 ;
 ; Parameters:
 ;     - "logical" start sector number  [bp+4]
-;     - destination (hi)               [bp+6]
-;     - destination (lo)               [bp+8]
+;     - destination                    [bp+6]
 ;     - number of sectors              [bp+10]
 ;
 
@@ -136,32 +135,29 @@ BUFFER_SIZE    equ 127      ; This the maximum number of sectors per cylinder
 read_disk32:
   push bp
   mov bp, sp
-  pusha
+  pushad
 
   xor ecx, ecx
-  mov cx, [bp+10]   ; cx: remaining sectors to copy
+  mov cx, [bp+10]         ; cx: remaining sectors to copy
 
   xor ebx, ebx
-  mov bx, [bp+4]    ; bx: logical sector number
+  mov bx, [bp+4]          ; bx: logical sector number
 
-  xor edx, edx
-  mov dx, [bp+6]    ;
-  shl edx, 16       ; edx: 32-bit destination offset
-  mov dx, [bp+8]    ;
+  mov edx, dword [bp+6]   ; edx: 32bit destination offset
 
   xor esi, esi
 
 .loop:
   cmp cx, BUFFER_SIZE
-  jb .esi_ksize
+  jb .smaller_chunk
 
   mov si, BUFFER_SIZE
-  jmp .bios_copy
+  jmp .load_buffer
 
-.esi_ksize:
+.smaller_chunk:
   mov si, cx
 
-.bios_copy:
+.load_buffer:
   push si
   push BUFFER_OFFSET
   push BUFFER_SEGMENT
@@ -169,104 +165,89 @@ read_disk32:
   call read_disk
   add sp, 8
 
+.copy_buffer:
   push si
-  push BUFFER_ADDRESS
-  mov eax, edx
-  push ax
-  shr eax, 16
-  push ax
+  push dword BUFFER_ADDRESS
+  push dword edx
   call copy_sectors
-  add sp, 8
+  add sp, 10
 
-  add bx, BUFFER_SIZE  ; move sector number
+  add bx, BUFFER_SIZE   ; move sector number
   add edx, BUFFER_SIZE  ; and destination pointer
 
-  sub cx, si          ; decrement remaining sectors to copy
+  sub cx, si            ; decrement remaining sectors to copy
   or cx, cx
   jnz .loop
 
-  popa
+  popad
   pop bp
   ret
 
 
-; copy_sectors(dest_hi, dest_lo, source, count)
+; copy_sectors(uint32 destination, uint32 source, uint16 count)
 ;
 ; Copy `n` sectors from source in low memory to a destination in high memory
 ;
 ; Parameters:
-;     - destination (hi)     [bp+4]
-;     - destination (lo)     [bp+6]
+;     - destination          [bp+4]
 ;     - source               [bp+8]
-;     - number of sectors    [bp+10]
+;     - number of sectors    [bp+12]
 ;
 
 copy_sectors:
   push bp
   mov bp, sp
-  pusha
+  pushad
 
-  xor eax, eax      ;
-  mov ax, [ebp+8]   ; Load Source
+  mov eax, dword [bp+8]   ; source
+  mov ebx, dword [bp+4]   ; destination
 
-  xor ebx, ebx
-  mov bx, [bp+4]    ;
-  shl ebx, 16       ; Load 32bit dest. offset into ebx
-  mov bx, [bp+6]    ;
-
-  mov ecx, [ebp+10]  ; Load count
+  xor ecx, ecx
+  mov cx, [bp+12]         ; count
 
 .loop:
   mov edx, ecx
   sal edx, 9        ; mult 512
   mov edi, edx
 
-  add edx, eax
-  push edx
+  add edx, eax      ; edx: source + count * 512
+  add edi, ebx      ; edi: destination + count * 512
 
-  add edi, ebx
-  push di
-  shr edi, 16
-  push di
-
+  push dword edx
+  push dword edi
   call copy_sector
-  add esp, 6
+  add sp, 8
   loop .loop
 
-  popa
+  popad
   pop bp
   ret
 
 
-; copy_sector(dest_hi, dest_lo, source)
+; copy_sector(uint32 destination, uint32 source)
 ;
 ; Copy a sector from source in low memory to a destination in high memory
 ;
 ; Parameters:
-;     - destination (hi)     [bp+4]
-;     - destination (lo)     [bp+6]
-;     - source               [bp+8]
+;     - destination   [bp+4]
+;     - source        [bp+8]
 ;
 
 copy_sector:
   push bp
   mov bp, sp
-  pusha
+  pushad
+
   mov ecx, 127
 
-  xor eax, eax
-  mov ax, [ebp+8]
-
-  xor ebx, ebx
-  mov bx, [bp+4]    ;
-  shl ebx, 16       ; load 32bit offset into ebx
-  mov bx, [bp+6]    ;
+  mov eax, dword [ebp+8]
+  mov ebx, dword [ebp+4]
 
 .loop:
-  mov edx, [ecx * 4 + eax]
-  mov [ecx * 4 + ebx], edx
+  mov edx, [eax + ecx * 4]
+  mov [ebx + ecx * 4], edx
   loop .loop
 
-  popa
+  popad
   pop bp
   ret

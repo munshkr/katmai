@@ -92,8 +92,8 @@ start:
 
 ; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
   push word [kernel_size]
-  push KERNEL_OFFSET_LO
   push KERNEL_OFFSET_HI
+  push KERNEL_OFFSET_LO
   push word [kernel_sector]
   call read_disk32
   add esi, 8
