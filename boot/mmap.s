@@ -18,6 +18,7 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+; FIXME change address (0x8000 steps over stage2.bin)
 mmap_entries: dw 0
 mmap_addr:    dw 0x8000
 

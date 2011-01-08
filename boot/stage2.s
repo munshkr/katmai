@@ -19,11 +19,22 @@
 ;
 
 BITS 16
-ORG 0x1000
-
-jmp start
+ORG 0x7e00
 
 
+jmp _start    ; force jump short (OP 3bytes)
+
+; boot.s stores here the sector number where
+; the kernel is located in our floppy image disk,
+; and the size (also in sectors).
+kernel_sector dw 0
+kernel_size dw 0
+
+_start:
+  jmp start
+
+
+; Messages
 stage2_init db "Running Second-stage", 13, 10, 0
 a20_enabled db "A20 line enabled", 13, 10, 0
 gone_unreal db "Gone Unreal", 13, 10, 0
@@ -31,6 +42,7 @@ kernel_loaded db "Kernel loaded", 13, 10, 0
 mm_failed db "Memory Map function failed", 13, 10, 0
 mm_ready db "Memory Map stored!", 13, 10, 0
 
+; Routines and macros
 %include "boot/screen.s"
 %include "boot/screen.mac"
 
@@ -42,7 +54,6 @@ mm_ready db "Memory Map stored!", 13, 10, 0
 
 
 start:
-  CLEAR
   PRINT stage2_init
 
 ; === A20 line ===/
@@ -53,39 +64,44 @@ start:
 ; === Go Unreal ===/
   call enable_unreal_mode
   PRINT gone_unreal
-; ===/
-
-; === Memory Map ===/
-  call make_mmap
-  cmp dword [mmap_entries], 0
-  jne .mmap_ok
-
-  PRINT mm_failed
-  jmp $
-
-.mmap_ok:
-  PRINT mm_ready
-; ===/
-
 
   ; test unreal mode
   ;mov ebx, 0xcafecafe
   ;mov eax, 0x200000
   ;mov dword [ds:eax], ebx
   ;mov ecx, [ds:eax]
+  ;xchg bx, bx
+  ;; Typing 'x 0x200000' in bochs debugger
+  ;; should return '0xcafecafe'.
+; ===/
 
+; === Memory Map ===/
+  ;call make_mmap
+  ;cmp dword [mmap_entries], 0
+  ;jne .mmap_ok
 
-  ; TODO load kernel at 0x100000 (start of high-memory, >= 1 Mb)
-  ;push [[S2SIZE + 1]]
-  ;push 0
-  ;push 0x1000
-  ;push S2SIZE
-  ;call read_disk
-  ;add esi, 8
+  ;PRINT mm_failed
+  ;jmp $
+
+;.mmap_ok:
+  ;PRINT mm_ready
+; ===/
 
 .idle:
   xchg bx, bx
+  hlt
   jmp .idle
+
+; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
+  push word [kernel_size]
+  push 0
+  push 0x10
+  push word [kernel_sector]
+  call read_disk32
+  add esi, 8
+
+  PRINT kernel_loaded
+; ===/
 
 
 ; === Enter Protected Mode ===

@@ -21,6 +21,7 @@
 BITS 16           ; We need 16-bit intructions for Real mode
 ORG 0x7c00        ; The BIOS loads the boot sector into memory location 0x7c00
 
+STAGE2_ADDR equ 0x7e00    ; Inmediately after first-stage boot
 
 ; == Header and data section ==
 
@@ -39,27 +40,25 @@ loading        db "Loading second-stage bootloader...", 13, 10, 0
 ; == Bootsector Code ==
   
 start:
-  ;CLEAR                   ; Clear screen
+  CLEAR                   ; Clear screen
   PRINT loading           ; Print hello message
 
-; === Load second-stage at 0x1000 (usable low-memory) ===
+; === Load second-stage at STAGE2_ADDR (usable low-memory) ===
+  mov dx, STAGE2_ADDR
 
   push 2
   push 0
-  push 0x1000
+  push dx
   push S2SIZE
   call read_disk
-  add esp, 8
+  add sp, 8
 
-  or ax, ax
-  jnz .readerror
+  ; store kernel location on image disk (S2SIZE + 1)
+  ; (ignore short `jmp _start --> jmp .+4` instruction (opcode: 'E9 04 00'))
+  mov word [edx + 3], S2SIZE + 1
+  mov word [edx + 5], KSIZE
 
-  jmp 0x0:0x1000
-
-.readerror:
-  PRINT read_disk_fail
-  cli
-  hlt
+  jmp 0:STAGE2_ADDR
 
 
 ; If NASM throws "TIMES value is negative" here, it means we have

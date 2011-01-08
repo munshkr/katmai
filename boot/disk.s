@@ -29,7 +29,7 @@
 ;     - destination offset             [bp+6]
 ;     - number of sectors              [bp+4]
 ;
-; TODO Retry thrice only, then return -1 in AX on failure.
+; TODO Retry thrice only, halt on failure
 ;
 
 ; Floppy constants
@@ -98,7 +98,6 @@ read_disk:
 .done:
   popa
   pop bp                ; leave stack frame
-  xor ax, ax
   ret
 
 
@@ -111,8 +110,8 @@ read_disk:
 ; buffer in conventional memory. Then relocate data from
 ; buffer to a 32bit offset in high memory.
 ;
-; A20 line and unreal mode must be enabled before calling
-; this routine.
+; NOTE: A20 line and unreal mode must be enabled before 
+; calling this routine.
 ;
 ; Parameters:
 ;     - "logical" start sector number  [bp+10]
@@ -121,9 +120,12 @@ read_disk:
 ;     - number of sectors              [bp+4]
 ;
 
-BUFFER_ADDR equ 0x9000
-BUFFER_SIZE equ 127 ; This the maximum number of sectors per cylinder
-                    ; the READ_DISK routine of some BIOSes support.
+BUFFER_SEGMENT equ 0x7000
+BUFFER_OFFSET  equ 0
+BUFFER_ADDRESS equ 0x70000  ; Final address after real mode address translation
+
+BUFFER_SIZE    equ 127      ; This the maximum number of sectors per cylinder
+                            ; the READ_DISK routine of some BIOSes support.
 
 read_disk32:
   push bp           ; set up stack frame
@@ -155,14 +157,14 @@ read_disk32:
   
 .bios_copy:
   push ebx
-  push 0
-  push BUFFER_ADDR
+  push BUFFER_SEGMENT
+  push BUFFER_OFFSET
   push esi
   call read_disk
   add esp, 8
   
   push esi
-  push BUFFER_ADDR
+  push BUFFER_ADDRESS
   mov eax, edx
   push ax
   shr eax, 16
@@ -170,8 +172,12 @@ read_disk32:
   call copy_sectors
   add esp, 8
 
-  add edx, BUFFER_SIZE
-  add ebx, BUFFER_SIZE
+  add ebx, BUFFER_SIZE  ; move source 
+  add edx, BUFFER_SIZE  ; and destination pointers
+
+  sub ecx, esi          ; decrement remaining sectors to copy
+  or ecx, ecx
+  jnz .loop
 
   popa
   pop bp
@@ -180,7 +186,7 @@ read_disk32:
 
 ; copy_sectors(dest_hi, dest_lo, source, count)
 ;
-; Copy `n` sectors from source in low memory to a destination in high-memory
+; Copy `n` sectors from source in low memory to a destination in high memory
 ;
 ; Parameters:
 ;     - destination (hi)     [bp+10]
@@ -228,7 +234,7 @@ copy_sectors:
   
 ; copy_sector(dest_hi, dest_lo, source)
 ;
-; Copy a sector from source in low memory to a destination in high-memory
+; Copy a sector from source in low memory to a destination in high memory
 ;
 ; Parameters:
 ;     - destination (hi)     [bp+8]
