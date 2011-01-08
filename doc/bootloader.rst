@@ -4,12 +4,19 @@ Bootloader
 Memory map
 ----------
 
+========  ========  ========  ========================================
+Location            Size      Description
+------------------  --------  ----------------------------------------
+From      To
+========  ========  ========  ========================================
 Conventional memory
-* 0x7c00-0x7dff --> bootstrap loader
-* 0x7e00-?      --> second stage
-
+----------------------------------------------------------------------
+0x7c00    0x7dff    0x200     First-stage boot (boot.bin)
+0x7e00    ?         ?         Second-stage bootloader (stage2.bin)
 Upper memory area (UMA)
-* 0x70000-0x7fe00 --> 64kb buffer for loading kernel to HMA
-
+----------------------------------------------------------------------
+0x70000   0x7fe00   0xfe00    ~64KB buffer for loading kernel to HMA
 High memory area (HMA)
-* 0x100000 --> kernel
+----------------------------------------------------------------------
+0x100000  ?         ?         Kernel
+========  ========  ========  ========================================
