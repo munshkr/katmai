@@ -38,7 +38,7 @@ jmp start
 loading        db "Loading second-stage bootloader...", 13, 10, 0
 
 ; == Bootsector Code ==
-  
+
 start:
   CLEAR                   ; Clear screen
   PRINT loading           ; Print hello message
@@ -46,10 +46,10 @@ start:
 ; === Load second-stage at STAGE2_ADDR (usable low-memory) ===
   mov dx, STAGE2_ADDR
 
-  push 2
-  push 0
-  push dx
   push S2SIZE
+  push dx
+  push 0
+  push 2
   call read_disk
   add sp, 8
 

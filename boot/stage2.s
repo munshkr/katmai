@@ -21,6 +21,9 @@
 BITS 16
 ORG 0x7e00
 
+KERNEL_OFFSET_HI equ 0x0010     ;
+KERNEL_OFFSET_LO equ 0x0000     ; ~> 0x100000
+
 
 jmp _start    ; force jump short (OP 3bytes)
 
@@ -57,7 +60,7 @@ start:
   PRINT stage2_init
 
 ; === A20 line ===/
-  call enable_a20   
+  call enable_a20
   PRINT a20_enabled
 ; ===/
 
@@ -87,21 +90,21 @@ start:
   ;PRINT mm_ready
 ; ===/
 
-.idle:
-  xchg bx, bx
-  hlt
-  jmp .idle
-
 ; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
   push word [kernel_size]
-  push 0
-  push 0x10
+  push KERNEL_OFFSET_LO
+  push KERNEL_OFFSET_HI
   push word [kernel_sector]
   call read_disk32
   add esi, 8
 
   PRINT kernel_loaded
 ; ===/
+
+.idle:
+  xchg bx, bx
+  hlt
+  jmp .idle
 
 
 ; === Enter Protected Mode ===
@@ -110,7 +113,7 @@ enter_pm:
   xor ax, ax        ; Clear AX register
   mov ds, ax        ; Set DS-register to 0 - used by lgdt
 
-  lgdt [gdt_desc]   ; Load the GDT descriptor 
+  lgdt [gdt_desc]   ; Load the GDT descriptor
 
   mov eax, cr0      ; Copy the contents of CR0 into EAX
   or eax, 1         ; Set bit 0     (0xFE = Real Mode)

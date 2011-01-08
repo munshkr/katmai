@@ -24,10 +24,10 @@
 ; Read `n` sectors from the floppy drive using READ_DISK command
 ;
 ; Parameters:
-;     - "logical" start sector number  [bp+10]
-;     - destination segment            [bp+8]
-;     - destination offset             [bp+6]
-;     - number of sectors              [bp+4]
+;     - "logical" start sector number  [bp+4]
+;     - destination segment            [bp+6]
+;     - destination offset             [bp+8]
+;     - number of sectors              [bp+10]
 ;
 ; TODO Retry thrice only, halt on failure
 ;
@@ -46,17 +46,23 @@ read_disk_fail db "Failed to read sectors!", 13, 10, 0
 
 
 read_disk:
-  push bp           ; set up stack frame
+  push bp
   mov bp, sp
-  pusha             ; save all registers
+  pusha
 
   ; Convert logical sector number to physical (sector:cylinder:head)
 
   ; Sector = log_sec % SECTORS_PER_TRACK
   ; Head = (log_sec / SECTORS_PER_TRACK) % HEADS
 
-  mov ax, [bp+10]           ; get logical sector number from stack
-  xor dx, dx                ; dx is high part of dividend (== 0)
+  xor eax, eax      ;
+  xor ebx, ebx      ; just in case, reset registers 
+  xor ecx, ecx      ; (specially the high words)
+  xor edx, edx      ;
+
+  mov ax, [bp+4]            ; get logical sector number from stack
+  xor dx, dx                ; dx is high part of dividend
+
   mov bx, SECTORS_PER_TRACK ; divisor
   div bx                    ; do the division
   mov [cs:sec], dx          ; sector is the remainder
@@ -66,7 +72,7 @@ read_disk:
 
   ; Track = log_sec / (SECTORS_PER_TRACK * HEADS)
 
-  mov ax, [bp+10]                   ; get logical sector number again
+  mov ax, [bp+4]                    ; get logical sector number again
   xor dx, dx                        ; dx is high part of dividend
   mov bx, SECTORS_PER_TRACK*HEADS   ; divisor
   div bx                            ; do the division
@@ -78,12 +84,12 @@ read_disk:
   int 13h               ; Call BIOS routine
   jc .fail              ; If CF is set, there was an error.
 
-  mov ax, [bp+8]        ; destination segment
+  mov ax, [bp+6]        ; destination segment
   mov es, ax
-  mov bx, [bp+6]        ; destination offset
+  mov bx, [bp+8]        ; destination offset
 
   mov ah, 02h           ; READ-SECTOR command
-  mov al, [bp+4]        ; Number of sectors to read
+  mov al, [bp+10]       ; Number of sectors to read
   mov dl, 0             ; Drive 0 is floppy drive
   mov ch, [cs:track]    ; Track
   mov cl, [cs:sec]      ; Starting sector
@@ -97,27 +103,27 @@ read_disk:
 
 .done:
   popa
-  pop bp                ; leave stack frame
+  pop bp
   ret
 
 
 ; read_disk32(start_sector, dest_hi, dest_lo, count)
 ;
-; Read `n` sectors from the floppy drive to a destination 
+; Read `n` sectors from the floppy drive to a destination
 ; in high-memory (above 1Mb).
 ;
 ; Call `read_disk` routine and store read sectors on a
 ; buffer in conventional memory. Then relocate data from
 ; buffer to a 32bit offset in high memory.
 ;
-; NOTE: A20 line and unreal mode must be enabled before 
+; NOTE: A20 line and unreal mode must be enabled before
 ; calling this routine.
 ;
 ; Parameters:
-;     - "logical" start sector number  [bp+10]
-;     - destination (hi)               [bp+8]
-;     - destination (lo)               [bp+6]
-;     - number of sectors              [bp+4]
+;     - "logical" start sector number  [bp+4]
+;     - destination (hi)               [bp+6]
+;     - destination (lo)               [bp+8]
+;     - number of sectors              [bp+10]
 ;
 
 BUFFER_SEGMENT equ 0x7000
@@ -128,87 +134,87 @@ BUFFER_SIZE    equ 127      ; This the maximum number of sectors per cylinder
                             ; the READ_DISK routine of some BIOSes support.
 
 read_disk32:
-  push bp           ; set up stack frame
+  push bp
   mov bp, sp
-  pusha             ; save all registers
+  pusha
 
   xor ecx, ecx
-  mov cx, [bp+4]    ; cx: remaining sectors to copy
+  mov cx, [bp+10]   ; cx: remaining sectors to copy
 
   xor ebx, ebx
-  mov bx, [bp+10]   ; bx: logical sector number
+  mov bx, [bp+4]    ; bx: logical sector number
 
   xor edx, edx
-  mov dx, [bp+8]    ;
-  shl edx, 16       ; edx: 32-bit destination offset
   mov dx, [bp+6]    ;
+  shl edx, 16       ; edx: 32-bit destination offset
+  mov dx, [bp+8]    ;
 
   xor esi, esi
 
 .loop:
-  cmp ecx, BUFFER_SIZE
+  cmp cx, BUFFER_SIZE
   jb .esi_ksize
 
-  mov esi, BUFFER_SIZE
+  mov si, BUFFER_SIZE
   jmp .bios_copy
 
 .esi_ksize:
-  mov esi, ecx
-  
+  mov si, cx
+
 .bios_copy:
-  push ebx
-  push BUFFER_SEGMENT
+  push si
   push BUFFER_OFFSET
-  push esi
+  push BUFFER_SEGMENT
+  push bx
   call read_disk
-  add esp, 8
-  
-  push esi
+  add sp, 8
+
+  push si
   push BUFFER_ADDRESS
   mov eax, edx
   push ax
   shr eax, 16
   push ax
   call copy_sectors
-  add esp, 8
+  add sp, 8
 
-  add ebx, BUFFER_SIZE  ; move source 
-  add edx, BUFFER_SIZE  ; and destination pointers
+  add bx, BUFFER_SIZE  ; move sector number
+  add edx, BUFFER_SIZE  ; and destination pointer
 
-  sub ecx, esi          ; decrement remaining sectors to copy
-  or ecx, ecx
+  sub cx, si          ; decrement remaining sectors to copy
+  or cx, cx
   jnz .loop
 
   popa
   pop bp
   ret
-  
+
 
 ; copy_sectors(dest_hi, dest_lo, source, count)
 ;
 ; Copy `n` sectors from source in low memory to a destination in high memory
 ;
 ; Parameters:
-;     - destination (hi)     [bp+10]
-;     - destination (lo)     [bp+8]
-;     - source               [bp+6]
-;     - number of sectors    [bp+4]
+;     - destination (hi)     [bp+4]
+;     - destination (lo)     [bp+6]
+;     - source               [bp+8]
+;     - number of sectors    [bp+10]
 ;
 
 copy_sectors:
-  push bp           ; set up stack frame
+  push bp
   mov bp, sp
   pusha
-  
+
   xor eax, eax      ;
-  mov ax, [ebp+4]   ; Load Source
+  mov ax, [ebp+8]   ; Load Source
 
   xor ebx, ebx
-  mov bx, [bp+8]    ;
+  mov bx, [bp+4]    ;
   shl ebx, 16       ; Load 32bit dest. offset into ebx
   mov bx, [bp+6]    ;
 
-  mov ecx, [ebp+4]  ; Load count
+  mov ecx, [ebp+10]  ; Load count
 
 .loop:
   mov edx, ecx
@@ -217,7 +223,7 @@ copy_sectors:
 
   add edx, eax
   push edx
-  
+
   add edi, ebx
   push di
   shr edi, 16
@@ -231,28 +237,28 @@ copy_sectors:
   pop bp
   ret
 
-  
+
 ; copy_sector(dest_hi, dest_lo, source)
 ;
 ; Copy a sector from source in low memory to a destination in high memory
 ;
 ; Parameters:
-;     - destination (hi)     [bp+8]
+;     - destination (hi)     [bp+4]
 ;     - destination (lo)     [bp+6]
-;     - source               [bp+4]
+;     - source               [bp+8]
 ;
 
 copy_sector:
-  push bp           ; set up stack frame
+  push bp
   mov bp, sp
   pusha
   mov ecx, 127
-  
+
   xor eax, eax
-  mov ax, [ebp+4]
+  mov ax, [ebp+8]
 
   xor ebx, ebx
-  mov bx, [bp+8]    ;
+  mov bx, [bp+4]    ;
   shl ebx, 16       ; load 32bit offset into ebx
   mov bx, [bp+6]    ;
 
