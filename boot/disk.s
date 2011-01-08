@@ -1,5 +1,5 @@
 ;
-; disk.s ~ BIOS disk reading subroutines
+; disk.s ~ Disk reading subroutines
 ;
 ; Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
 ;                Patricio Reboratti <darthpolly@gmail.com>
@@ -18,33 +18,34 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+
+; read_disk(start_sector, dest_segment, dest_offset, count)
+;
+; Read `n` sectors from the floppy drive using READ_DISK command
+;
+; Parameters:
+;     - "logical" start sector number  [bp+10]
+;     - destination segment            [bp+8]
+;     - destination offset             [bp+6]
+;     - number of sectors              [bp+4]
+;
+; TODO Retry thrice only, then return -1 in AX on failure.
+;
+
+; Floppy constants
 SECTORS_PER_TRACK equ 18
 HEADS equ 2
 CYLINDERS equ 80
 
-
-; read_disk local variables
+; Local variables
 head: dw 0
 track: dw 0
 sec: dw 0
-
-
-; READ_DISK source, destination, lenght
-; Read n sectors from the floppy drive.
-;
-; Parameters:
-;     - "logical" sector number   [bp+10]
-;     - destination segment       [bp+8]
-;     - destination offset        [bp+6]
-;     - number of sectors         [bp+4]
-;
-; TODO Retry thrice only, then return -1 in AX on failure.
 
 read_disk:
   push bp           ; set up stack frame
   mov bp, sp
   pusha             ; save all registers
-
 
   ; Convert logical sector number to physical (sector:cylinder:head)
 
@@ -68,15 +69,14 @@ read_disk:
   div bx                            ; do the division
   mov [cs:track], ax                ; track is quotient
 
-
 .reset:
   mov ah, 0             ; RESET-DISK command
   mov dl, 0             ; Drive 0 is floppy drive
   int 13h               ; Call BIOS routine
   jc .fail              ; If CF is set, there was an error.
 
-  mov  ax, [bp+8]        ; destination segment
-  mov  es, ax
+  mov ax, [bp+8]        ; destination segment
+  mov es, ax
   mov bx, [bp+6]        ; destination offset
 
   mov ah, 02h           ; READ-SECTOR command
@@ -94,42 +94,51 @@ read_disk:
 
 .done:
   popa
-  pop  bp      ; leave stack frame
+  pop bp                ; leave stack frame
   xor ax, ax
   ret
 
 
-
-; READ_DISK32 source, dest(lo), dest(hi), length
-; Read n sectors from the floppy drive to a buffer and then to a 32 bits destination.
+; read_disk32(start_sector, dest_hi, dest_lo, count)
+;
+; Read `n` sectors from the floppy drive to a destination 
+; in high-memory (above 1Mb).
+;
+; Call `read_disk` routine and store read sectors on a
+; buffer in conventional memory. Then relocate data from
+; buffer to a 32bit offset in high memory.
+;
+; A20 line and unreal mode must be enabled before calling
+; this routine.
 ;
 ; Parameters:
-;     - "logical" sector number   [bp+10]
-;     - destination (hi)          [bp+8]
-;     - destination (lo)          [bp+6]
-;     - number of sectors         [bp+4]
+;     - "logical" start sector number  [bp+10]
+;     - destination (hi)               [bp+8]
+;     - destination (lo)               [bp+6]
+;     - number of sectors              [bp+4]
 ;
 
 BUFFER_ADDR equ 0x9000
-BUFFER_SIZE equ 127 
+BUFFER_SIZE equ 127 ; This the maximum number of sectors per cylinder
+                    ; the READ_DISK routine of some BIOSes support.
 
 read_disk32:
   push bp           ; set up stack frame
   mov bp, sp
   pusha             ; save all registers
 
-  
-  mov ecx, KSIZE    ; store "remaining sectors to copy" in ecx
-  xor ebx, ebx
-  mov bx, [bp+10]
+  xor ecx, ecx
+  mov cx, [bp+4]    ; cx: remaining sectors to copy
 
-  xor esi, esi
+  xor ebx, ebx
+  mov bx, [bp+10]   ; bx: logical sector number
 
   xor edx, edx
   mov dx, [bp+8]    ;
-  shl edx, 16       ; load 32bit offset into edx
+  shl edx, 16       ; edx: 32-bit destination offset
   mov dx, [bp+6]    ;
 
+  xor esi, esi
 
 .loop:
   cmp ecx, BUFFER_SIZE
@@ -166,11 +175,16 @@ read_disk32:
   ret
   
 
-; Copia n sectores de memoria a memoria
-; - Dest (hi)   [ebp+10]
-; - Dest (lo)   [ebp+8]
-; - Source      [ebp+6]
-; - Count       [ebp+4] 
+; copy_sectors(dest_hi, dest_lo, source, count)
+;
+; Copy `n` sectors from source in low memory to a destination in high-memory
+;
+; Parameters:
+;     - destination (hi)     [bp+10]
+;     - destination (lo)     [bp+8]
+;     - source               [bp+6]
+;     - number of sectors    [bp+4]
+;
 
 copy_sectors:
   push bp           ; set up stack frame
@@ -209,10 +223,15 @@ copy_sectors:
   ret
 
   
-; Copia un sector de memoria a memoria
-; - Dest (hi)    [ebp+8]
-; - Dest (lo)    [ebp+6]
-; - Source       [ebp+4]
+; copy_sector(dest_hi, dest_lo, source)
+;
+; Copy a sector from source in low memory to a destination in high-memory
+;
+; Parameters:
+;     - destination (hi)     [bp+8]
+;     - destination (lo)     [bp+6]
+;     - source               [bp+4]
+;
 
 copy_sector:
   push bp           ; set up stack frame
@@ -236,4 +255,3 @@ copy_sector:
   popa
   pop bp
   ret
-
