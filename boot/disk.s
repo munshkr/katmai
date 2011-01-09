@@ -131,6 +131,7 @@ BUFFER_ADDRESS equ 0x70000  ; Final address after real mode address translation
 
 BUFFER_SIZE    equ 127      ; This the maximum number of sectors per cylinder
                             ; the READ_DISK routine of some BIOSes support.
+BUFFER_SIZE_B  equ BUFFER_SIZE * 512
 
 read_disk32:
   push bp
@@ -172,10 +173,10 @@ read_disk32:
   call copy_sectors
   add sp, 10
 
-  add bx, BUFFER_SIZE   ; move sector number
-  add edx, BUFFER_SIZE  ; and destination pointer
+  add bx, BUFFER_SIZE     ; move sector number
+  add edx, BUFFER_SIZE_B  ; and destination pointer
 
-  sub cx, si            ; decrement remaining sectors to copy
+  sub cx, si              ; decrement remaining sectors to copy
   or cx, cx
   jnz .loop
 
