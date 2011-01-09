@@ -21,8 +21,7 @@
 BITS 16
 ORG 0x7e00
 
-KERNEL_OFFSET_HI equ 0x0010     ;
-KERNEL_OFFSET_LO equ 0x0000     ; ~> 0x100000
+KERNEL_ADDRESS equ 0x100000
 
 
 jmp _start    ; force jump short (OP 3bytes)
@@ -92,8 +91,7 @@ start:
 
 ; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
   push word [kernel_size]
-  push KERNEL_OFFSET_HI
-  push KERNEL_OFFSET_LO
+  push dword KERNEL_ADDRESS
   push word [kernel_sector]
   call read_disk32
   add esi, 8
