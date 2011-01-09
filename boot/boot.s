@@ -53,9 +53,9 @@ start:
   call read_disk
   add sp, 8
 
-  ; store kernel location on image disk (S2SIZE + 1)
+  ; store kernel location on image disk (BOOTSIZE + S2SIZE + 1)
   ; (ignore short `jmp _start --> jmp .+4` instruction (opcode: 'E9 04 00'))
-  mov word [edx + 3], S2SIZE + 1
+  mov word [edx + 3], S2SIZE + 2
   mov word [edx + 5], KSIZE
 
   jmp 0:STAGE2_ADDR
