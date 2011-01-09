@@ -208,6 +208,7 @@ copy_sectors:
 
 .loop:
   mov edx, ecx
+  dec edx
   sal edx, 9        ; mult 512
   mov edi, edx
 
@@ -239,14 +240,16 @@ copy_sector:
   mov bp, sp
   pushad
 
-  mov ecx, 127
+  mov ecx, 128
 
   mov eax, dword [ebp+8]
   mov ebx, dword [ebp+4]
 
 .loop:
-  mov edx, [eax + ecx * 4]
-  mov [ebx + ecx * 4], edx
+  mov esi, ecx
+  dec esi
+  mov edx, [eax + esi * 4]
+  mov [ebx + esi * 4], edx
   loop .loop
 
   popad
