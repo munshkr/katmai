@@ -1,4 +1,4 @@
-AUXFILES := Makefile README COPYING bochsrc
+AUXFILES := Makefile README.rst COPYING bochsrc doc
 BOOTDIR := boot
 KERNELDIRS := kernel
 
@@ -22,7 +22,7 @@ BOOT_BIN := boot.bin
 STAGE2_BIN := stage2.bin
 KERNEL_BIN := kernel.bin
 DISKIMAGE := diskette.img
-TAR_FILE := noxpgos.tar.gz
+TAR_FILE := katmai.tar.gz
 
 # TODO Check if these ultra-paranoid gcc flags are useful
 # CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
