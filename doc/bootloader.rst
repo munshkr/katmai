@@ -11,6 +11,7 @@ From      To
 ========  ========  ========  ========================================
 Conventional memory
 ----------------------------------------------------------------------
+0x500     ?         ?         Memory map
 0x7c00    0x7dff    0x200     First-stage boot (boot.bin)
 0x7e00    ?         ?         Second-stage bootloader (stage2.bin)
 Upper memory area (UMA)

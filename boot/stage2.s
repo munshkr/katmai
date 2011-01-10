@@ -78,15 +78,17 @@ start:
 ; ===/
 
 ; === Memory Map ===/
-  ;call make_mmap
-  ;cmp dword [mmap_entries], 0
-  ;jne .mmap_ok
+memory_map:
+  call make_mmap
+  xchg bx, bx
+  or eax, eax
+  jnz .mmap_ok
 
-  ;PRINT mm_failed
-  ;jmp $
+  PRINT mm_failed
+  jmp $
 
-;.mmap_ok:
-  ;PRINT mm_ready
+.mmap_ok:
+  PRINT mm_ready
 ; ===/
 
 ; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
