@@ -42,7 +42,7 @@ mmap_addr:    dw 0x8000
 ;; ----------------------------------------
 
 make_mmap:
-  pusha
+  pushad
   xor ebp, ebp                  ;
   mov di, [mmap_addr]           ; Init
   xor ebx, ebx                  ;
@@ -95,6 +95,5 @@ make_mmap:
 
 .end:
   mov dword [mmap_entries], ebp
-  popa
+  popad
   ret
-

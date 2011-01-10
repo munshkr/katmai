@@ -37,17 +37,19 @@ SECTORS_PER_TRACK equ 18
 HEADS equ 2
 CYLINDERS equ 80
 
-; Local variables
-head: dw 0
-track: dw 0
-sec: dw 0
+%define start_sector [bp+4]
+%define dest_segment [bp+6]
+%define dest_offset  [bp+8]
+%define count        [bp+10]
+
+%define head   [bp-2]
+%define track  [bp-4]
+%define sector [bp-6]
 
 read_disk_fail db "Failed to read sectors!", 13, 10, 0
 
-
 read_disk:
-  push bp
-  mov bp, sp
+  enter 6, 0
   pushad
 
   ; Convert logical sector number to physical (sector:cylinder:head)
@@ -55,28 +57,23 @@ read_disk:
   ; Sector = log_sec % SECTORS_PER_TRACK
   ; Head = (log_sec / SECTORS_PER_TRACK) % HEADS
 
-  xor eax, eax      ;
-  xor ebx, ebx      ; just in case, reset registers 
-  xor ecx, ecx      ; (specially the high words)
-  xor edx, edx      ;
-
-  mov ax, [bp+4]            ; get logical sector number from stack
+  mov ax, start_sector      ; get logical sector number from stack
   xor dx, dx                ; dx is high part of dividend
 
   mov bx, SECTORS_PER_TRACK ; divisor
   div bx                    ; do the division
-  mov [cs:sec], dx          ; sector is the remainder
+  mov sector, dx            ; sector is the remainder
   mov bl, HEADS
   div bl
-  mov [cs:head], ah
+  mov head, ah
 
   ; Track = log_sec / (SECTORS_PER_TRACK * HEADS)
 
-  mov ax, [bp+4]                    ; get logical sector number again
+  mov ax, start_sector              ; get logical sector number again
   xor dx, dx                        ; dx is high part of dividend
   mov bx, SECTORS_PER_TRACK*HEADS   ; divisor
   div bx                            ; do the division
-  mov [cs:track], ax                ; track is quotient
+  mov track, ax                     ; track is quotient
 
 .reset:
   mov ah, 0             ; RESET-DISK command
@@ -84,16 +81,16 @@ read_disk:
   int 13h               ; Call BIOS routine
   jc .fail              ; If CF is set, there was an error.
 
-  mov ax, [bp+6]        ; destination segment
+  mov ax, dest_segment  ; destination segment
   mov es, ax
-  mov bx, [bp+8]        ; destination offset
+  mov bx, dest_offset   ; destination offset
 
   mov ah, 02h           ; READ-SECTOR command
-  mov al, [bp+10]       ; Number of sectors to read
+  mov al, count         ; Number of sectors to read
   mov dl, 0             ; Drive 0 is floppy drive
-  mov ch, [cs:track]    ; Track
-  mov cl, [cs:sec]      ; Starting sector
-  mov dh, [cs:head]     ; Head
+  mov ch, track         ; Track
+  mov cl, sector        ; Starting sector
+  mov dh, head          ; Head
   int 13h               ; Call BIOS routine
   jnc .done             ; CF is set if there was an error
 
@@ -103,7 +100,7 @@ read_disk:
 
 .done:
   popad
-  pop bp
+  leave
   ret
 
 
@@ -133,18 +130,21 @@ BUFFER_SIZE    equ 127      ; This the maximum number of sectors per cylinder
                             ; the READ_DISK routine of some BIOSes support.
 BUFFER_SIZE_B  equ BUFFER_SIZE * 512
 
+%define start_sector [bp+4]
+%define dest         [bp+6]
+%define count        [bp+10]
+
 read_disk32:
-  push bp
-  mov bp, sp
+  enter 0, 0
   pushad
 
   xor ecx, ecx
-  mov cx, [bp+10]         ; cx: remaining sectors to copy
+  mov cx, count           ; cx: remaining sectors to copy
 
   xor ebx, ebx
-  mov bx, [bp+4]          ; bx: logical sector number
+  mov bx, start_sector    ; bx: logical sector number
 
-  mov edx, dword [bp+6]   ; edx: 32bit destination offset
+  mov edx, dword dest     ; edx: 32bit destination offset
 
   xor esi, esi
 
@@ -181,7 +181,7 @@ read_disk32:
   jnz .loop
 
   popad
-  pop bp
+  leave
   ret
 
 
@@ -195,16 +195,19 @@ read_disk32:
 ;     - number of sectors    [bp+12]
 ;
 
+%define dest    [bp+4]
+%define source  [bp+8]
+%define count   [bp+12]
+
 copy_sectors:
-  push bp
-  mov bp, sp
+  enter 0, 0
   pushad
 
-  mov eax, dword [bp+8]   ; source
-  mov ebx, dword [bp+4]   ; destination
+  mov eax, dword source   ; source
+  mov ebx, dword dest     ; destination
 
   xor ecx, ecx
-  mov cx, [bp+12]         ; count
+  mov cx, count           ; count
 
 .loop:
   mov edx, ecx
@@ -222,7 +225,7 @@ copy_sectors:
   loop .loop
 
   popad
-  pop bp
+  leave
   ret
 
 
@@ -235,15 +238,17 @@ copy_sectors:
 ;     - source        [bp+8]
 ;
 
+%define dest    [bp+4]
+%define source  [bp+8]
+
 copy_sector:
-  push bp
-  mov bp, sp
+  enter 0, 0
   pushad
 
   mov ecx, 128
 
-  mov eax, dword [ebp+8]
-  mov ebx, dword [ebp+4]
+  mov eax, dword source
+  mov ebx, dword dest
 
 .loop:
   mov esi, ecx
@@ -253,5 +258,5 @@ copy_sector:
   loop .loop
 
   popad
-  pop bp
+  leave
   ret

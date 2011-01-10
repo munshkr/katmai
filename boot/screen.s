@@ -21,7 +21,8 @@
 
 ; To be deleted - Not needed here
 bios_clear_screen:
-  pusha
+  enter 0, 0
+  pushad
   mov ah, 0x06    ; BIOS: Clear the screen
   xor cx, cx      ; from (0,0)
   mov dx, 0x184f  ; to (24,79)
@@ -31,18 +32,16 @@ bios_clear_screen:
   xor dx, dx      ; at (0, 0)
   mov bh, dh      ; page=0
   int 0x10
-  ;mov byte [cs:bios_row], 0  ; update variable
-  popa
+  popad
+  leave
   ret
 
 bios_print:
   ; Print a null-terminated string on the screen.
-  pusha
+  enter 0, 0
+  pushad
   mov ah, 0xe     ; BIOS: Write char and attr at cursor pos
   mov bx, 0x7     ; page=0, attributes is lgrey/black.
-  ;mov dl, 1       ; first colum (forced)
-  ;mov dh, [cs:bios_row]
-  ;inc byte [cs:bios_row]
 .loop:
   lodsb
   or al, al
@@ -50,5 +49,6 @@ bios_print:
   int 0x10
   jmp .loop
 .done:
-  popa
+  popad
+  leave
   ret

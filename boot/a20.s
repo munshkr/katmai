@@ -18,7 +18,9 @@ enable_a20:
   ; This routine will enable the A20 address line in the keyboard
   ; controller.  It will halt processor on failure.
 
-  pusha
+  enter 0, 0
+  pushad
+
   cli       ; Make sure interrupts are disabled
 
   ; Keep a counter so that we can make up to 5 attempts to turn
@@ -184,5 +186,7 @@ enable_a20:
 
   .success:
   sti     ; Enable interrupts
-  popa
+
+  popad
+  leave
   ret

@@ -28,6 +28,8 @@ _gdt_end:
 
 
 enable_unreal_mode:
+  enter 0, 0
+  pushad
   push ds                ; save real mode
 
   lgdt [_gdtinfo]         ; load gdt register
@@ -43,4 +45,6 @@ enable_unreal_mode:
   mov cr0, eax           ; by toggling bit again
 
   pop ds                 ; get back old segment
+  popad
+  leave
   ret
