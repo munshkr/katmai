@@ -39,7 +39,7 @@
 
 MMAP_ADDRESS equ 0x500
 
-%define mmap_entries [bp-2]
+%define mmap_entries bp-2
 
 make_mmap:
   enter 2, 0
@@ -93,15 +93,15 @@ make_mmap:
 
   add di, 24
 
-  mov dx, mmap_entries    ;
+  mov dx, [mmap_entries]  ;
   inc dx                  ; Otherwise, increment and keep on maping
-  mov mmap_entries, dx    ;
+  mov [mmap_entries], dx  ;
 
   jmp .loop
 
 .end:
   popad
-  mov eax, mmap_entries
+  mov eax, [mmap_entries]
 
   leave
   ret

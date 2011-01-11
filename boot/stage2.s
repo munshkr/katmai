@@ -80,7 +80,6 @@ start:
 ; === Memory Map ===/
 memory_map:
   call make_mmap
-  xchg bx, bx
   or eax, eax
   jnz .mmap_ok
 
