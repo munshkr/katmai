@@ -23,12 +23,6 @@
 ;
 ; Read `n` sectors from the floppy drive using READ_DISK command
 ;
-; Parameters:
-;     - "logical" start sector number  [bp+4]
-;     - destination segment            [bp+6]
-;     - destination offset             [bp+8]
-;     - number of sectors              [bp+10]
-;
 ; TODO Retry thrice only, halt on failure
 ;
 
@@ -116,11 +110,6 @@ read_disk:
 ; NOTE: A20 line and unreal mode must be enabled before
 ; calling this routine.
 ;
-; Parameters:
-;     - "logical" start sector number  [bp+4]
-;     - destination                    [bp+6]
-;     - number of sectors              [bp+10]
-;
 
 BUFFER_SEGMENT equ 0x7000
 BUFFER_OFFSET  equ 0
@@ -189,11 +178,6 @@ read_disk32:
 ;
 ; Copy `n` sectors from source in low memory to a destination in high memory
 ;
-; Parameters:
-;     - destination          [bp+4]
-;     - source               [bp+8]
-;     - number of sectors    [bp+12]
-;
 
 %define dest    bp+4
 %define source  bp+8
@@ -232,10 +216,6 @@ copy_sectors:
 ; copy_sector(uint32 destination, uint32 source)
 ;
 ; Copy a sector from source in low memory to a destination in high memory
-;
-; Parameters:
-;     - destination   [bp+4]
-;     - source        [bp+8]
 ;
 
 %define dest    bp+4
