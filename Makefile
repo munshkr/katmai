@@ -31,8 +31,8 @@ TAR_FILE := katmai.tar.gz
 # 				  -Wconversion -Wstrict-prototypes
 CFLAGS := -Wall -Wextra -Werror -ffreestanding -fno-builtin -nostdlib \
 				  -nostartfiles -nodefaultlibs
-LDFLAGS := -static -m elf_i386 -b elf32-i386 --oformat binary \
-				   -e start -Ttext 0x1000
+LDFLAGS := -m elf_i386 -b elf32-i386 --oformat binary \
+				   -Tkernel/link.ld
 
 .PHONY: all clean dist todolist
 

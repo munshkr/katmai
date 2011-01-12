@@ -100,12 +100,6 @@ memory_map:
   PRINT kernel_loaded
 ; ===/
 
-.idle:
-  xchg bx, bx
-  hlt
-  jmp .idle
-
-
 ; === Enter Protected Mode ===
 
 enter_pm:
@@ -129,4 +123,4 @@ kernel_segments:
   mov ss, ax        ; Move a valid data segment into the stack segment register
   mov esp, 0x90000  ; Move the stack pointer to 090000h
 
-  jmp 08h:01000h    ; Jump to section 08h (code), offset 01000h
+  jmp 08h:0100000h  ; Jump to section 08h (code), offset 0100000h
