@@ -11,9 +11,8 @@ BOOTSRCFILES := $(shell find $(BOOTDIR) -mindepth 1 -name "*.s")
 
 ALLFILES := $(BOOTSRCFILES) $(KERNELSRCFILES) $(AUXFILES)
 
-# kernel/loader.o must be linked first when compiling kernel binary,
-# so we put .s files first in OBJFILES list as a workaround.
-OBJFILES := $(patsubst %.s,%.o,$(ASMFILES))
+# kernel/loader.o must be linked first when compiling kernel binary
+OBJFILES := kernel/loader.o
 OBJFILES += $(patsubst %.c,%.o,$(SRCFILES)) 
 
 DEPFILES := $(patsubst %.c,%.d,$(SRCFILES))
@@ -31,7 +30,7 @@ TAR_FILE := katmai.tar.gz
 # 				  -Wconversion -Wstrict-prototypes
 CFLAGS := -Wall -Wextra -Werror -ffreestanding -fno-builtin -nostdlib \
 				  -nostartfiles -nodefaultlibs
-LDFLAGS := -m elf_i386 -b elf32-i386 --oformat binary \
+LDFLAGS := -melf_i386 -belf32-i386 --oformat binary \
 				   -Tkernel/link.ld
 
 .PHONY: all clean dist todolist
