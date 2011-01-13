@@ -43,5 +43,8 @@ void putln(void);
 /* Put string at current position */
 int puts(char*);
 
+void put_dec(uint32_t n);
+void put_hex(uint32_t n);
+
 
 #endif
