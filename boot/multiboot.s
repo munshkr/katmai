@@ -18,5 +18,15 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+MULTIBOOT_INFO_MEM_MAP            equ 0x00000040
+
+MULTIBOOT_INFO_FLAGS    equ MULTIBOOT_INFO_MEM_MAP
+
+
 multiboot_info:
-  ; TODO
+  dd MULTIBOOT_INFO_FLAGS
+
+  times 10 dd 0
+
+  mmap_length dd 0
+  dd MMAP_ADDRESS

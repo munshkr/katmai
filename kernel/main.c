@@ -27,11 +27,16 @@
 
 void kmain(uint32_t magic, multiboot_info_t* mbi) {
   clear();
+
+  if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+    puts("Invalid magic code");
+    return;
+  }
+
 	puts("Kernel is on!");
 
   debug();
 
   /* remove */
-  magic = 0;
   mbi = 0;
 }

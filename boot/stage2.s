@@ -89,10 +89,16 @@ memory_map:
   jnz .mmap_ok
 
   PRINT mm_failed
-  jmp $
+.halt:
+  hlt
+  jmp .halt
 
 .mmap_ok:
   PRINT mm_ready
+
+  mov ebx, 24
+  mul ebx                   ; get mmap size in bytes
+  mov [mmap_length], eax    ; store length in multiboot structure field
 ; ===/
 
 ; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
@@ -104,10 +110,6 @@ memory_map:
 
   PRINT kernel_loaded
 ; ===/
-
-; === Build Multiboot information structure ===
-
-
 
 ; === Enter Protected Mode ===
 
