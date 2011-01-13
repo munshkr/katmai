@@ -23,6 +23,9 @@ ORG 0x7e00
 
 KERNEL_ADDRESS equ 0x100000
 
+; This should be in EAX before jumping to kernel
+MULTIBOOT_BOOTLOADER_MAGIC equ 0x2badb002
+
 
 jmp _start    ; force jump short (OP 3bytes)
 
@@ -53,6 +56,8 @@ mm_ready db "Memory Map stored!", 13, 10, 0
 %include "boot/mmap.s"
 %include "boot/disk.s"
 %include "boot/gdt.s"
+
+%include "boot/multiboot.s"
 
 
 start:
@@ -100,6 +105,10 @@ memory_map:
   PRINT kernel_loaded
 ; ===/
 
+; === Build Multiboot information structure ===
+
+
+
 ; === Enter Protected Mode ===
 
 enter_pm:
@@ -123,4 +132,10 @@ kernel_segments:
   mov ss, ax        ; Move a valid data segment into the stack segment register
   mov esp, 0x90000  ; Move the stack pointer to 090000h
 
-  jmp 08h:0100000h  ; Jump to section 08h (code), offset 0100000h
+  ; The presence of this value indicates to the kernel that it was loaded 
+  ; by a Multiboot-compliant boot loader.
+  mov eax, MULTIBOOT_BOOTLOADER_MAGIC
+
+  mov ebx, multiboot_info
+
+  jmp 08h:KERNEL_ADDRESS    ; Jump to section 08h (code), KERNEL_ADDRESS
