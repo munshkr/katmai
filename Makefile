@@ -53,7 +53,7 @@ clean:
 
 dist:
 	@echo ">> Making tarball: "$(TAR_FILE)
-	tar czf $(TAR_FILE) $(ALLFILES)
+	tar czvf $(TAR_FILE) $(ALLFILES)
 
 todolist:
 	-@for file in $(ALLFILES); do fgrep -H -e TODO -e FIXME $$file; done; true
