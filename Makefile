@@ -2,7 +2,7 @@ AUXFILES := Makefile README.rst COPYING bochsrc doc
 BOOTDIR := boot
 KERNELDIRS := kernel
 
-ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.s")
+ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 \( -name "*.s" -not -name "loader.s" -not -name "multiboot.s" \))
 SRCFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.c")
 HDRFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.h")
 
@@ -13,7 +13,8 @@ ALLFILES := $(BOOTSRCFILES) $(KERNELSRCFILES) $(AUXFILES)
 
 # kernel/loader.o must be linked first when compiling kernel binary
 OBJFILES := kernel/loader.o
-OBJFILES += $(patsubst %.c,%.o,$(SRCFILES)) 
+OBJFILES += $(patsubst %.s,%.o,$(ASMFILES))
+OBJFILES += $(patsubst %.c,%.o,$(SRCFILES))
 
 DEPFILES := $(patsubst %.c,%.d,$(SRCFILES))
 

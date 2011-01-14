@@ -83,10 +83,12 @@ int puts(char *message) {
 	return length;
 }
 
+/* TODO
 void put_dec(uint32_t n) {
-  /* TODO */
 }
+*/
 
+/* TODO
 void put_hex(uint32_t n) {
-  /* TODO */
 }
+*/

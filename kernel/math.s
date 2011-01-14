@@ -10,8 +10,9 @@ log10:
   push esi
   push edi
 
-  fld [number]
+  ;fld [number]
   ; TODO ...
+  xor eax, eax
 
   pop edi
   pop esi

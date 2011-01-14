@@ -22,6 +22,8 @@
 #ifndef __VIDEO_H__
 #define __VIDEO_H__
 
+#include "x86.h"
+
 #define VGA_TEXT_BUFFER 0xb8000
 #define MAX_COLS 80
 #define MAX_ROWS 25
@@ -43,8 +45,8 @@ void putln(void);
 /* Put string at current position */
 int puts(char*);
 
-void put_dec(uint32_t n);
-void put_hex(uint32_t n);
+void put_dec(uint32_t);
+void put_hex(uint32_t);
 
 
 #endif
