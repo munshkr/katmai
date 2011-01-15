@@ -21,11 +21,12 @@
 
 #include "multiboot.h"
 #include "x86.h"
-
+#include "math.h"
 #include "video.h"
 
 
 void kmain(uint32_t magic, multiboot_info_t* mbi) {
+  init_fpu();
   clear();
 
   if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
@@ -33,7 +34,13 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
     return;
   }
 
-	puts("Kernel is on!");
+  if (pow(2.0f, 5.0f) == 32.0f) {
+    puts("Pow funca");
+  } else {
+    puts("Todomal");
+  }
+
+  puts("Kernel is on!");
 
   debug();
 

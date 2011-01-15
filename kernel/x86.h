@@ -21,4 +21,8 @@ static inline void debug(void) {
   __asm __volatile("xchg %bx, %bx");
 }
 
+static inline void init_fpu(void) {
+	__asm __volatile("finit");
+}
+
 #endif /* __X86_H__ */
