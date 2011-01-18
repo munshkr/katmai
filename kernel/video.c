@@ -86,11 +86,12 @@ int puts(char *message) {
 
 /* Get number of digits of a number */
 uint32_t len(const int32_t number, const uint8_t base) {
-  uint32_t length = 0;
+  uint32_t length = 1;
   uint32_t div = ABS(number);
 
   while (div) {
     div /= base;
+    if (!div) break;
     length++;
   }
 
