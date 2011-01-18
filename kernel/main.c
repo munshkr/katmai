@@ -37,14 +37,15 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
   }
 
   if (mbi->flags && MULTIBOOT_INFO_MEM_MAP) {
-    println("## Memory map ##");
-    print("Entries: "); PRINT_DEC(mbi->mmap_length); putln();
+    uint32_t mmap_entries = mbi->mmap_length / 24;
 
-    uint32_t i;
+    println("## Memory map ##");
+    print("Entries: "); PRINT_DEC(mmap_entries); putln();
+
     multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t *) mbi->mmap_addr;
-    for (i = 0; i < mbi->mmap_length; ++i, ++mmap_entry) {
+    uint32_t i;
+    for (i = 0; i < mmap_entries; ++i, ++mmap_entry) {
       print("Entry "); PRINT_DEC(i); putln();
-      print("  .size: "); PRINT_DEC(mmap_entry->size); putln();
       print("  .addr: "); PRINT_HEX(mmap_entry->addr); putln();
       print("  .len: "); PRINT_DEC(mmap_entry->len); putln();
       print("  .type: ");
@@ -53,8 +54,6 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
       } else {
         println("reserved");
       }
-
-      debug();
     }
   }
 }
