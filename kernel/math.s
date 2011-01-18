@@ -1,5 +1,4 @@
-global log10
-global pow
+global log10, pow
 
 ; float log10(float number);
 
@@ -24,6 +23,7 @@ log10:
   pop esi
   pop ebx
   leave
+  ret
 
 
 ; float pow(float base, float exponent);
@@ -56,4 +56,4 @@ pow:
   pop esi
   pop ebx
   leave
-
+  ret
