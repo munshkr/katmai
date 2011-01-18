@@ -48,7 +48,9 @@ void putc(char);
 /* New line */
 void putln(void);
 /* Put string at current position */
-int puts(char*);
+void print(char*);
+/* Put string at current position and linefeed */
+void println(char*);
 
 void print_base(int32_t number, uint8_t base);
 

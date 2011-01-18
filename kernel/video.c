@@ -20,7 +20,6 @@
 */
 
 #include "video.h"
-#include "x86.h"
 
 
 /* global cursor */
@@ -67,20 +66,21 @@ void putc(char c) {
 void putln(void) {
   x = 0;
   y++;
-}
-
-int puts(char *message) {
-	int length;
-	while(*message) {
-		putc(*message++);
-		length++;
-	}
-  putln();
   if (y == MAX_ROWS) {
     scroll();
     y--;
   }
-	return length;
+}
+
+void print(char *message) {
+  while (*message) {
+    putc(*message++);
+  }
+}
+
+void println(char *message) {
+  print(message);
+  putln();
 }
 
 

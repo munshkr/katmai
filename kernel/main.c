@@ -29,15 +29,32 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
   init_fpu();
   clear();
 
+  println("Kernel is on!"); putln();
+
   if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-    puts("Invalid magic code!");
-    PRINT_HEX(magic);
+    print("Invalid magic code: "); PRINT_HEX(magic); putln();
     return;
   }
 
-  puts("Kernel is on!");
-  debug();
+  if (mbi->flags && MULTIBOOT_INFO_MEM_MAP) {
+    println("## Memory map ##");
+    print("Entries: "); PRINT_DEC(mbi->mmap_length); putln();
 
-  /* remove */
-  mbi = 0;
+    uint32_t i;
+    multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t *) mbi->mmap_addr;
+    for (i = 0; i < mbi->mmap_length; ++i, ++mmap_entry) {
+      print("Entry "); PRINT_DEC(i); putln();
+      print("  .size: "); PRINT_DEC(mmap_entry->size); putln();
+      print("  .addr: "); PRINT_HEX(mmap_entry->addr); putln();
+      print("  .len: "); PRINT_DEC(mmap_entry->len); putln();
+      print("  .type: ");
+      if (mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+        println("available");
+      } else {
+        println("reserved");
+      }
+
+      debug();
+    }
+  }
 }
