@@ -22,7 +22,9 @@
 #ifndef __VIDEO_H__
 #define __VIDEO_H__
 
+
 #include "x86.h"
+#include "math.h"
 
 #define VGA_TEXT_BUFFER 0xb8000
 #define MAX_COLS 80
@@ -31,6 +33,9 @@
 /* Colors */
 #define C_BLACK 0x00
 #define C_LIGHT_GRAY 0x07
+
+#define ASCII_0 0x30
+#define ASCII_a 0x61
 
 
 /* Clear screen */
@@ -45,8 +50,9 @@ void putln(void);
 /* Put string at current position */
 int puts(char*);
 
-void put_dec(uint32_t);
-void put_hex(uint32_t);
+void print_base(int32_t number, uint8_t base);
 
+#define PRINT_DEC(n) print_base(n, 10)
+#define PRINT_HEX(n) print_base(n, 16)
 
 #endif

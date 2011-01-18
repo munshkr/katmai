@@ -30,18 +30,12 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
   clear();
 
   if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-    puts("Invalid magic code");
+    puts("Invalid magic code!");
+    PRINT_HEX(magic);
     return;
   }
 
-  if (pow(2.0f, 5.0f) == 32.0f) {
-    puts("Pow funca");
-  } else {
-    puts("Todomal");
-  }
-
   puts("Kernel is on!");
-
   debug();
 
   /* remove */

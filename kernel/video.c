@@ -83,12 +83,56 @@ int puts(char *message) {
 	return length;
 }
 
-/* TODO
-void put_dec(uint32_t n) {
-}
-*/
 
-/* TODO
-void put_hex(uint32_t n) {
+/* Get number of digits of a number */
+uint32_t len(const int32_t number, const uint8_t base) {
+  uint32_t length = 0;
+  uint32_t div = ABS(number);
+
+  while (div) {
+    div /= base;
+    length++;
+  }
+
+  return length;
 }
-*/
+
+/* Exponentiation function */
+uint32_t v_pow(const int32_t base, const uint32_t exponent) {
+  uint32_t i;
+  uint32_t res = 1;
+
+  for (i = 0; i < exponent; ++i) {
+    res *= base;
+  }
+
+  return res;
+}
+
+void print_base(int32_t number, uint8_t base) {
+  uint32_t i, digit;
+  const uint32_t ln = len(number, base);
+  uint32_t mult = v_pow(base, ln - 1);
+
+  if (number < 0) {
+    putc('-');
+    number = -number;
+  }
+
+  if (base == 16) {
+    putc('0');
+    putc('x');
+  }
+
+  for (i = 0; i < ln; ++i) {
+    digit = (number / mult) % base;
+    if (digit < 10) {
+      putc((char) digit + ASCII_0);
+    } else if (digit < 35) {
+      putc((char) (digit - 10) + ASCII_a);
+    } else {
+      putc('?');
+    }
+    mult /= base;
+  }
+}
