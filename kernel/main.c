@@ -23,6 +23,7 @@
 #include "x86.h"
 #include "math.h"
 #include "video.h"
+#include "descriptor_tables.h"
 
 
 void kmain(uint32_t magic, multiboot_info_t* mbi) {
@@ -55,6 +56,9 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
         println("reserved");
       }
     }
-	asm volatile ("int $0x3");
   }
+
+  /* Test breakpoint interrupt */
+  init_idt();
+	__asm __volatile("int $0x3");
 }

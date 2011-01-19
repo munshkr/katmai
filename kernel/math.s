@@ -15,7 +15,7 @@ log10:
   fld dword [number]
   fyl2x
   fldl2t
-  fdivp
+  fdivp st0
   fst dword [result]
   mov eax, [result]
 
@@ -47,7 +47,7 @@ pow:
   fxch st1
   f2xm1
   fld1
-  faddp
+  faddp st0
   fscale
   fst dword [result]
   mov eax, [result]

@@ -1,19 +1,19 @@
-#include "string.h"
+#include "descriptor_tables.h"
 
-extern void load_idt(uint32_t);
-static void init_idt();
-static void idt_set_gate(uint8_t, uint32_t, uint16_t, uint8_t);
+extern void load_idt(uint32_t base_addr);
+static void idt_set_gate(uint8_t index, uint32_t offset, uint16_t selector, uint8_t flags);
 
-idt_entry_t idt_entries[256] __attributes__ ((aligned (8)));
+
+idt_entry_t idt_entries[256] __attribute__ ((aligned (8)));
 idt_ptr_t   idt_ptr;
 
 
-static void init_idt()
+void init_idt()
 {
    idt_ptr.limit = sizeof(idt_entry_t) * 256 - 1;
    idt_ptr.base  = (uint32_t) &idt_entries;
 
-   memset(&idt_entries, 0, sizeof(idt_entry_t) * 256);
+   memset((uint32_t*) &idt_entries, 0, sizeof(idt_entry_t) * 256);
 
    /* TODO ? Put ISR functions inside an array and make this a for loop */
    idt_set_gate( 0, (uint32_t) isr0 , CODE_SEGMENT, INT_GATE_FLAGS);
@@ -49,17 +49,17 @@ static void init_idt()
    idt_set_gate(30, (uint32_t) isr30, CODE_SEGMENT, INT_GATE_FLAGS);
    idt_set_gate(31, (uint32_t) isr31, CODE_SEGMENT, INT_GATE_FLAGS);
 
-   load_idt((uint32_t)&idt_ptr);
+   load_idt((uint32_t) &idt_ptr);
 }
 
-static void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags)
+static void idt_set_gate(uint8_t index, uint32_t offset, uint16_t selector, uint8_t flags)
 {
-   idt_entries[num].base_lo = base & 0xFFFF;
-   idt_entries[num].base_hi = (base >> 16) & 0xFFFF;
+   idt_entries[index].offset_lo = offset & 0xFFFF;
+   idt_entries[index].offset_hi = (offset >> 16) & 0xFFFF;
 
-   idt_entries[num].sel     = sel;
-   idt_entries[num].always0 = 0;
+   idt_entries[index].selector = selector;
+   idt_entries[index].reserved = 0;
    // We must uncomment the OR below when we get to using user-mode.
    // It sets the interrupt gate's privilege level to 3.
-   idt_entries[num].flags   = flags /* | 0x60 */;
+   idt_entries[index].flags = flags /* | 0x60 */;
 }

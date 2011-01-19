@@ -1,6 +1,5 @@
-
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
-  [GLOBAL isr%1]        ; %1 accesses the first parameter.
+  global isr%1          ; %1 accesses the first parameter.
   isr%1:
     cli
     push byte 0
@@ -9,7 +8,7 @@
 %endmacro
 
 %macro ISR_ERRCODE 1
-  [GLOBAL isr%1]
+  global isr%1
   isr%1:
     cli
     push byte %1

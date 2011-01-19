@@ -1,8 +1,11 @@
 /*
-* x86.h ~ General x86 auxilary functions
+* isr_hi.h ~ Interface and structures for high level interrupt service routines.
 *
 * Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
 *                Patricio Reboratti <darthpolly@gmail.com>
+*
+* Part of this code is modified from Bran's kernel development tutorials
+* and JamesM's kernel development tutorials.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -19,31 +22,22 @@
 *
 */
 
-#ifndef __X86_H__
-#define __X86_H__
-
-typedef unsigned long long uint64_t;
-typedef unsigned int       uint32_t;
-typedef unsigned short     uint16_t;
-typedef unsigned char      uint8_t;
-
-typedef long long int64_t;
-typedef int       int32_t;
-typedef short     int16_t;
-typedef char      int8_t;
+#ifndef __ISR_HI_H__
+#define __ISR_HI_H__
 
 
-static inline void halt(void) {
-	__asm __volatile("hlt");
-}
+#include "descriptor_tables.h"
+#include "video.h"
 
-/* Bochs magic breakpoint */
-static inline void debug(void) {
-  __asm __volatile("xchg %bx, %bx");
-}
 
-static inline void init_fpu(void) {
-	__asm __volatile("finit");
-}
+struct registers
+{
+   uint32_t ds;                  /* Data segment selector */
+   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; /* Pushed by pusha */
+   uint32_t int_no, err_code;    /* Interrupt number and error code (if applicable) */
+   uint32_t eip, cs, eflags, useresp, ss; /* Pushed by the processor automatically */
+} __attribute__((packed));
+typedef struct registers registers_t;
 
-#endif /* __X86_H__ */
+
+#endif /* __ISR_HI_H__ */

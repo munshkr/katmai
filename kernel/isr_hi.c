@@ -1,8 +1,11 @@
 /*
-* x86.h ~ General x86 auxilary functions
+* isr_hi.c ~ High level interrupt service routines and interrupt request handlers.
 *
 * Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
 *                Patricio Reboratti <darthpolly@gmail.com>
+*
+* Part of this code is modified from Bran's kernel development tutorials
+* and JamesM's kernel development tutorials.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -19,31 +22,11 @@
 *
 */
 
-#ifndef __X86_H__
-#define __X86_H__
-
-typedef unsigned long long uint64_t;
-typedef unsigned int       uint32_t;
-typedef unsigned short     uint16_t;
-typedef unsigned char      uint8_t;
-
-typedef long long int64_t;
-typedef int       int32_t;
-typedef short     int16_t;
-typedef char      int8_t;
+#include "isr_hi.h"
 
 
-static inline void halt(void) {
-	__asm __volatile("hlt");
-}
-
-/* Bochs magic breakpoint */
-static inline void debug(void) {
-  __asm __volatile("xchg %bx, %bx");
-}
-
-static inline void init_fpu(void) {
-	__asm __volatile("finit");
-}
-
-#endif /* __X86_H__ */
+/* This gets called from our ASM interrupt handler stub */
+void isr_handler(registers_t regs)
+{
+  print("Received interrupt: "); PRINT_DEC(regs.int_no); putln();
+} 

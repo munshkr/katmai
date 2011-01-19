@@ -57,4 +57,5 @@ void print_base(int32_t number, uint8_t base);
 #define PRINT_DEC(n) print_base(n, 10)
 #define PRINT_HEX(n) print_base(n, 16)
 
-#endif
+
+#endif /* __VIDEO_H__ */
