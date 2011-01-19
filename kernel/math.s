@@ -18,6 +18,8 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+%include "kernel/x86.mac"
+
 global log10, pow
 
 
@@ -27,10 +29,7 @@ global log10, pow
 %define result ebp-4
 
 log10:
-  enter 4, 0
-  push ebx
-  push esi
-  push edi
+  PROLOGUE 4
 
   fld1
   fld dword [number]
@@ -40,24 +39,18 @@ log10:
   fst dword [result]
   mov eax, [result]
 
-  pop edi
-  pop esi
-  pop ebx
-  leave
+  EPILOGUE
   ret
 
 
 ; float pow(float base, float exponent);
 
-%define exponent ebp+12
-%define base ebp+8
-%define result ebp-4
+%define exponent  ebp+12
+%define base      ebp+8
+%define result    ebp-4
 
 pow:
-  enter 4, 0
-  push ebx
-  push esi
-  push edi
+  PROLOGUE 4
 
   fld dword [exponent]
   fld dword [base]
@@ -73,8 +66,5 @@ pow:
   fst dword [result]
   mov eax, [result]
 
-  pop edi
-  pop esi
-  pop ebx
-  leave
+  EPILOGUE
   ret
