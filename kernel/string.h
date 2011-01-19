@@ -1,5 +1,5 @@
 /*
-* string.h ~ String functions
+* string.h ~ String functions (header)
 *
 * Prototypes are based on C standard library
 *
@@ -12,7 +12,7 @@
 * (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY// without even the implied warranty of
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
 *
@@ -24,9 +24,12 @@
 #ifndef __STRING_H__
 #define __STRING_H__
 
+
 #include "x86.h"
 
+
 void memset(uint32_t* addr, const uint32_t value, const uint32_t size);
+
 
 
 #endif /* __STRING_H__ */
