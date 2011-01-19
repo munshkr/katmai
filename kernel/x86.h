@@ -22,6 +22,7 @@
 #ifndef __X86_H__
 #define __X86_H__
 
+
 typedef unsigned long long uint64_t;
 typedef unsigned int       uint32_t;
 typedef unsigned short     uint16_t;
@@ -45,5 +46,6 @@ static inline void debug(void) {
 static inline void init_fpu(void) {
 	__asm __volatile("finit");
 }
+
 
 #endif /* __X86_H__ */

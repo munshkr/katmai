@@ -1,3 +1,23 @@
+;
+; isr.s ~ Interrupt Service Routines
+;
+; Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
+;                Patricio Reboratti <darthpolly@gmail.com>
+;
+; This program is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
   global isr%1          ; %1 accesses the first parameter.
   isr%1:
@@ -13,8 +33,7 @@
     cli
     push byte %1
     jmp isr_common_stub
-%endmacro 
-
+%endmacro
 
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
@@ -49,19 +68,19 @@ ISR_NOERRCODE 29
 ISR_NOERRCODE 30
 ISR_NOERRCODE 31
 
-; In isr.c
+; Defined in isr_hi.c
 extern isr_handler
 
 ; This is our common ISR stub. It saves the processor state, sets
 ; up for kernel mode segments, calls the C-level fault handler,
 ; and finally restores the stack frame.
 isr_common_stub:
-   pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+   pushad               ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 
-   mov ax, ds               ; Lower 16-bits of eax = ds.
-   push eax                 ; save the data segment descriptor
+   mov ax, ds           ; Lower 16-bits of eax = ds.
+   push eax             ; Save the data segment descriptor
 
-   mov ax, 0x10  ; load the kernel data segment descriptor
+   mov ax, 0x10         ; Load the kernel data segment descriptor
    mov ds, ax
    mov es, ax
    mov fs, ax
@@ -69,13 +88,13 @@ isr_common_stub:
 
    call isr_handler
 
-   pop eax        ; reload the original data segment descriptor
+   pop eax              ; Reload the original data segment descriptor
    mov ds, ax
    mov es, ax
    mov fs, ax
    mov gs, ax
 
-   popa                     ; Pops edi,esi,ebp...
-   add esp, 8     ; Cleans up the pushed error code and pushed ISR number
+   popad                ; Pops edi,esi,ebp...
+   add esp, 8           ; Cleans up the pushed error code and pushed ISR number
    sti
-   iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP 
+   iret                 ; Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
