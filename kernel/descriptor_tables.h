@@ -23,7 +23,7 @@
 #define __DESCRIPTOR_TABLES_H__
 
 
-#include "x86.h"
+#include "common.h"
 #include "string.h"
 
 

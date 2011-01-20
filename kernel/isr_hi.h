@@ -26,8 +26,7 @@
 #define __ISR_HI_H__
 
 
-#include "descriptor_tables.h"
-#include "video.h"
+#include "common.h"
 
 
 struct registers

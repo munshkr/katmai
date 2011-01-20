@@ -25,7 +25,7 @@
 #define __STRING_H__
 
 
-#include "x86.h"
+#include "common.h"
 
 
 void memset(uint32_t* addr, const uint32_t value, const uint32_t size);

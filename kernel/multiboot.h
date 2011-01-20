@@ -30,6 +30,9 @@
 #define __MULTIBOOT_H__
 
 
+#include "common.h"
+
+
 /* How many bytes from the start of the file we search for the header. */
 #define MULTIBOOT_SEARCH                        8192
 
@@ -98,8 +101,6 @@
 /* Is there video information? */
 #define MULTIBOOT_INFO_VIDEO_INFO               0x00000800
 
-
-#include "x86.h"
 
 struct multiboot_header
 {

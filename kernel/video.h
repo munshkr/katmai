@@ -23,8 +23,9 @@
 #define __VIDEO_H__
 
 
-#include "x86.h"
+#include "common.h"
 #include "math.h"
+
 
 #define VGA_TEXT_BUFFER 0xb8000
 #define MAX_COLS 80

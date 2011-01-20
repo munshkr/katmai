@@ -1,5 +1,5 @@
 /*
-* x86.h ~ General x86 auxilary functions
+* common.h ~ Common x86 kernel procedures and functions
 *
 * Copyright 2010 Damián Emiliano Silvani <dsilvani@gmail.com>,
 *                Patricio Reboratti <darthpolly@gmail.com>
@@ -19,8 +19,8 @@
 *
 */
 
-#ifndef __X86_H__
-#define __X86_H__
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
 
 typedef unsigned long long uint64_t;
@@ -54,4 +54,4 @@ static inline void load_idt(void* base_addr) {
 }
 
 
-#endif /* __X86_H__ */
+#endif /* __COMMON_H__ */

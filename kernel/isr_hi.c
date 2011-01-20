@@ -23,6 +23,7 @@
 */
 
 #include "isr_hi.h"
+#include "video.h"
 
 
 /* This gets called from our ASM interrupt handler stub */

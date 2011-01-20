@@ -25,6 +25,9 @@
 #define __MATH_H__
 
 
+#include "common.h"
+
+
 #define ABS(n)  (n > 0 ? n : -n)
 
 extern float log10(float number);

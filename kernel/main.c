@@ -19,7 +19,7 @@
  *
 */
 
-#include "x86.h"
+#include "common.h"
 #include "multiboot.h"
 #include "descriptor_tables.h"
 #include "video.h"

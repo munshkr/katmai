@@ -18,7 +18,7 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-%include "kernel/x86.mac"
+%include "kernel/common.mac"
 
 global log10, pow
 
