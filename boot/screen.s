@@ -21,34 +21,34 @@
 
 ; To be deleted - Not needed here
 bios_clear_screen:
-  enter 0, 0
-  pushad
-  mov ah, 0x06    ; BIOS: Clear the screen
-  xor cx, cx      ; from (0,0)
-  mov dx, 0x184f  ; to (24,79)
-  mov bh, 0x07    ; keep light grey display
-  int 0x10
-  mov ah, 0x02    ; BIOS: Set cursor position
-  xor dx, dx      ; at (0, 0)
-  mov bh, dh      ; page=0
-  int 0x10
-  popad
-  leave
-  ret
+    enter 0, 0
+    pushad
+    mov ah, 0x06    ; BIOS: Clear the screen
+    xor cx, cx      ; from (0,0)
+    mov dx, 0x184f  ; to (24,79)
+    mov bh, 0x07    ; keep light grey display
+    int 0x10
+    mov ah, 0x02    ; BIOS: Set cursor position
+    xor dx, dx      ; at (0, 0)
+    mov bh, dh      ; page=0
+    int 0x10
+    popad
+    leave
+    ret
 
 bios_print:
-  ; Print a null-terminated string on the screen.
-  enter 0, 0
-  pushad
-  mov ah, 0xe     ; BIOS: Write char and attr at cursor pos
-  mov bx, 0x7     ; page=0, attributes is lgrey/black.
+    ; Print a null-terminated string on the screen.
+    enter 0, 0
+    pushad
+    mov ah, 0xe     ; BIOS: Write char and attr at cursor pos
+    mov bx, 0x7     ; page=0, attributes is lgrey/black.
 .loop:
-  lodsb
-  or al, al
-  jz .done
-  int 0x10
-  jmp .loop
+    lodsb
+    or al, al
+    jz .done
+    int 0x10
+    jmp .loop
 .done:
-  popad
-  leave
-  ret
+    popad
+    leave
+    ret

@@ -43,59 +43,59 @@ CYLINDERS equ 80
 read_disk_fail db "Failed to read sectors!", 13, 10, 0
 
 read_disk:
-  enter 6, 0
-  pushad
+    enter 6, 0
+    pushad
 
-  ; Convert logical sector number to physical (sector:cylinder:head)
+    ; Convert logical sector number to physical (sector:cylinder:head)
 
-  ; Sector = log_sec % SECTORS_PER_TRACK
-  ; Head = (log_sec / SECTORS_PER_TRACK) % HEADS
+    ; Sector = log_sec % SECTORS_PER_TRACK
+    ; Head = (log_sec / SECTORS_PER_TRACK) % HEADS
 
-  mov ax, [start_sector]    ; get logical sector number from stack
-  xor dx, dx                ; dx is high part of dividend
+    mov ax, [start_sector]    ; get logical sector number from stack
+    xor dx, dx                ; dx is high part of dividend
 
-  mov bx, SECTORS_PER_TRACK ; divisor
-  div bx                    ; do the division
-  mov [sector], dx          ; sector is the remainder
-  mov bl, HEADS
-  div bl
-  mov [head], ah
+    mov bx, SECTORS_PER_TRACK ; divisor
+    div bx                    ; do the division
+    mov [sector], dx          ; sector is the remainder
+    mov bl, HEADS
+    div bl
+    mov [head], ah
 
-  ; Track = log_sec / (SECTORS_PER_TRACK * HEADS)
+    ; Track = log_sec / (SECTORS_PER_TRACK * HEADS)
 
-  mov ax, [start_sector]            ; get logical sector number again
-  xor dx, dx                        ; dx is high part of dividend
-  mov bx, SECTORS_PER_TRACK*HEADS   ; divisor
-  div bx                            ; do the division
-  mov [track], ax                   ; track is quotient
+    mov ax, [start_sector]            ; get logical sector number again
+    xor dx, dx                        ; dx is high part of dividend
+    mov bx, SECTORS_PER_TRACK*HEADS   ; divisor
+    div bx                            ; do the division
+    mov [track], ax                   ; track is quotient
 
 .reset:
-  mov ah, 0               ; RESET-DISK command
-  mov dl, 0               ; Drive 0 is floppy drive
-  int 13h                 ; Call BIOS routine
-  jc .fail                ; If CF is set, there was an error.
+    mov ah, 0               ; RESET-DISK command
+    mov dl, 0               ; Drive 0 is floppy drive
+    int 13h                 ; Call BIOS routine
+    jc .fail                ; If CF is set, there was an error.
 
-  mov ax, [dest_segment]  ; destination segment
-  mov es, ax
-  mov bx, [dest_offset]   ; destination offset
+    mov ax, [dest_segment]  ; destination segment
+    mov es, ax
+    mov bx, [dest_offset]   ; destination offset
 
-  mov ah, 02h           ; READ-SECTOR command
-  mov al, [count]       ; Number of sectors to read
-  mov dl, 0             ; Drive 0 is floppy drive
-  mov ch, [track]       ; Track
-  mov cl, [sector]      ; Starting sector
-  mov dh, [head]        ; Head
-  int 13h               ; Call BIOS routine
-  jnc .done             ; CF is set if there was an error
+    mov ah, 02h           ; READ-SECTOR command
+    mov al, [count]       ; Number of sectors to read
+    mov dl, 0             ; Drive 0 is floppy drive
+    mov ch, [track]       ; Track
+    mov cl, [sector]      ; Starting sector
+    mov dh, [head]        ; Head
+    int 13h               ; Call BIOS routine
+    jnc .done             ; CF is set if there was an error
 
 .fail:
-  PRINT read_disk_fail  ; Print error message,
-  jmp .reset            ; and retry
+    PRINT read_disk_fail  ; Print error message,
+    jmp .reset            ; and retry
 
 .done:
-  popad
-  leave
-  ret
+    popad
+    leave
+    ret
 
 
 ; read_disk32(uint16 start_sector, uint32 destination, uint16 count)
@@ -116,7 +116,7 @@ BUFFER_OFFSET  equ 0
 BUFFER_ADDRESS equ 0x70000  ; Final address after real mode address translation
 
 BUFFER_SIZE    equ 127      ; This the maximum number of sectors per cylinder
-                            ; the READ_DISK routine of some BIOSes support.
+                              ; the READ_DISK routine of some BIOSes support.
 BUFFER_SIZE_B  equ BUFFER_SIZE * 512
 
 %define start_sector bp+4
@@ -124,54 +124,54 @@ BUFFER_SIZE_B  equ BUFFER_SIZE * 512
 %define count        bp+10
 
 read_disk32:
-  enter 0, 0
-  pushad
+    enter 0, 0
+    pushad
 
-  xor ecx, ecx
-  mov cx, [count]         ; cx: remaining sectors to copy
+    xor ecx, ecx
+    mov cx, [count]         ; cx: remaining sectors to copy
 
-  xor ebx, ebx
-  mov bx, [start_sector]  ; bx: logical sector number
+    xor ebx, ebx
+    mov bx, [start_sector]  ; bx: logical sector number
 
-  mov edx, dword [dest]   ; edx: 32bit destination offset
+    mov edx, dword [dest]   ; edx: 32bit destination offset
 
-  xor esi, esi
+    xor esi, esi
 
 .loop:
-  cmp cx, BUFFER_SIZE
-  jb .smaller_chunk
+    cmp cx, BUFFER_SIZE
+    jb .smaller_chunk
 
-  mov si, BUFFER_SIZE
-  jmp .load_buffer
+    mov si, BUFFER_SIZE
+    jmp .load_buffer
 
 .smaller_chunk:
-  mov si, cx
+    mov si, cx
 
 .load_buffer:
-  push si
-  push BUFFER_OFFSET
-  push BUFFER_SEGMENT
-  push bx
-  call read_disk
-  add sp, 8
+    push si
+    push BUFFER_OFFSET
+    push BUFFER_SEGMENT
+    push bx
+    call read_disk
+    add sp, 8
 
 .copy_buffer:
-  push si
-  push dword BUFFER_ADDRESS
-  push dword edx
-  call copy_sectors
-  add sp, 10
+    push si
+    push dword BUFFER_ADDRESS
+    push dword edx
+    call copy_sectors
+    add sp, 10
 
-  add bx, BUFFER_SIZE     ; move sector number
-  add edx, BUFFER_SIZE_B  ; and destination pointer
+    add bx, BUFFER_SIZE     ; move sector number
+    add edx, BUFFER_SIZE_B  ; and destination pointer
 
-  sub cx, si              ; decrement remaining sectors to copy
-  or cx, cx
-  jnz .loop
+    sub cx, si              ; decrement remaining sectors to copy
+    or cx, cx
+    jnz .loop
 
-  popad
-  leave
-  ret
+    popad
+    leave
+    ret
 
 
 ; copy_sectors(uint32 destination, uint32 source, uint16 count)
@@ -184,33 +184,33 @@ read_disk32:
 %define count   bp+12
 
 copy_sectors:
-  enter 0, 0
-  pushad
+    enter 0, 0
+    pushad
 
-  mov eax, dword [source] ; source
-  mov ebx, dword [dest]   ; destination
+    mov eax, dword [source] ; source
+    mov ebx, dword [dest]   ; destination
 
-  xor ecx, ecx
-  mov cx, [count]         ; count
+    xor ecx, ecx
+    mov cx, [count]         ; count
 
 .loop:
-  mov edx, ecx
-  dec edx
-  sal edx, 9        ; mult 512
-  mov edi, edx
+    mov edx, ecx
+    dec edx
+    sal edx, 9        ; mult 512
+    mov edi, edx
 
-  add edx, eax      ; edx: source + count * 512
-  add edi, ebx      ; edi: destination + count * 512
+    add edx, eax      ; edx: source + count * 512
+    add edi, ebx      ; edi: destination + count * 512
 
-  push dword edx
-  push dword edi
-  call copy_sector
-  add sp, 8
-  loop .loop
+    push dword edx
+    push dword edi
+    call copy_sector
+    add sp, 8
+    loop .loop
 
-  popad
-  leave
-  ret
+    popad
+    leave
+    ret
 
 
 ; copy_sector(uint32 destination, uint32 source)
@@ -222,21 +222,21 @@ copy_sectors:
 %define source  bp+8
 
 copy_sector:
-  enter 0, 0
-  pushad
+    enter 0, 0
+    pushad
 
-  mov ecx, 128
+    mov ecx, 128
 
-  mov eax, dword [source]
-  mov ebx, dword [dest]
+    mov eax, dword [source]
+    mov ebx, dword [dest]
 
 .loop:
-  mov esi, ecx
-  dec esi
-  mov edx, [eax + esi * 4]
-  mov [ebx + esi * 4], edx
-  loop .loop
+    mov esi, ecx
+    dec esi
+    mov edx, [eax + esi * 4]
+    mov [ebx + esi * 4], edx
+    loop .loop
 
-  popad
-  leave
-  ret
+    popad
+    leave
+    ret

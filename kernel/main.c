@@ -26,62 +26,62 @@
 
 
 void print_mbi(multiboot_info_t* mbi) {
-  println("## Multiboot Info ##");
+    println("## Multiboot Info ##");
 
-  print(".flags: "); PRINT_HEX(mbi->flags); putln();
+    print(".flags: "); PRINT_HEX(mbi->flags); putln();
 
-  print(".mem_lower: "); PRINT_HEX(mbi->mem_lower); putln();
-  print(".mem_upper: "); PRINT_HEX(mbi->mem_upper); putln();
+    print(".mem_lower: "); PRINT_HEX(mbi->mem_lower); putln();
+    print(".mem_upper: "); PRINT_HEX(mbi->mem_upper); putln();
 
-  print(".boot_device: "); PRINT_HEX(mbi->boot_device); putln();
+    print(".boot_device: "); PRINT_HEX(mbi->boot_device); putln();
 
-  print(".cmdline: "); PRINT_HEX(mbi->cmdline); putln();
+    print(".cmdline: "); PRINT_HEX(mbi->cmdline); putln();
 
-  print(".mods_count: "); PRINT_DEC(mbi->mods_count); putln();
-  print(".mods_addr: "); PRINT_HEX(mbi->mods_addr); putln();
+    print(".mods_count: "); PRINT_DEC(mbi->mods_count); putln();
+    print(".mods_addr: "); PRINT_HEX(mbi->mods_addr); putln();
 }
 
 void kmain(uint32_t magic, multiboot_info_t* mbi) {
-  clear();
-  println("Kernel is on!"); putln();
+    clear();
+    println("Kernel is on!"); putln();
 
-  if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-    print("Invalid magic code: "); PRINT_HEX(magic); putln();
-    return;
-  }
-
-  /* Init the floating point unit */
-  init_fpu();
-
-  /* Initialize the Interrupt Descriptor Table and
-     Interrupt Service Routines */
-  init_idt();
-
-  /* Print Multiboot information structure */
-  print_mbi(mbi); putln();
-
-  /* Print (if available) memory map */
-  if (mbi->flags && MULTIBOOT_INFO_MEM_MAP) {
-    uint32_t mmap_entries = mbi->mmap_length / 24;
-
-    println("## Memory map ##");
-    print("Entries: "); PRINT_DEC(mmap_entries); putln();
-
-    multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t *)
-      mbi->mmap_addr;
-    for (uint32_t i = 0; i < mmap_entries; ++i, ++mmap_entry) {
-      print("Entry "); PRINT_DEC(i); putln();
-      print("  .addr: "); PRINT_HEX(mmap_entry->addr); putln();
-      print("  .len: "); PRINT_DEC(mmap_entry->len); putln();
-      print("  .type: ");
-      if (mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
-        println("available");
-      } else {
-        println("reserved");
-      }
+    if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+        print("Invalid magic code: "); PRINT_HEX(magic); putln();
+        return;
     }
-  }
 
-  /* Test breakpoint interrupt */
-  __asm __volatile("int $0x3");
+    /* Init the floating point unit */
+    init_fpu();
+
+    /* Initialize the Interrupt Descriptor Table and
+       Interrupt Service Routines */
+    init_idt();
+
+    /* Print Multiboot information structure */
+    print_mbi(mbi); putln();
+
+    /* Print (if available) memory map */
+    if (mbi->flags && MULTIBOOT_INFO_MEM_MAP) {
+        uint32_t mmap_entries = mbi->mmap_length / 24;
+
+        println("## Memory map ##");
+        print("Entries: "); PRINT_DEC(mmap_entries); putln();
+
+        multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t *)
+            mbi->mmap_addr;
+        for (uint32_t i = 0; i < mmap_entries; ++i, ++mmap_entry) {
+            print("Entry "); PRINT_DEC(i); putln();
+            print("  .addr: "); PRINT_HEX(mmap_entry->addr); putln();
+            print("  .len: "); PRINT_DEC(mmap_entry->len); putln();
+            print("  .type: ");
+            if (mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                println("available");
+            } else {
+                println("reserved");
+            }
+        }
+    }
+
+    /* Test breakpoint interrupt */
+    __asm __volatile("int $0x3");
 }

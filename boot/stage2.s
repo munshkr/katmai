@@ -36,7 +36,7 @@ kernel_sector dw 0
 kernel_size dw 0
 
 _start:
-  jmp start
+    jmp start
 
 
 ; Messages
@@ -61,83 +61,83 @@ mm_ready db "Memory Map stored!", 13, 10, 0
 
 
 start:
-  PRINT stage2_init
+    PRINT stage2_init
 
 ; === A20 line ===/
-  call enable_a20
-  PRINT a20_enabled
+    call enable_a20
+    PRINT a20_enabled
 ; ===/
 
 ; === Go Unreal ===/
-  call enable_unreal_mode
-  PRINT gone_unreal
+    call enable_unreal_mode
+    PRINT gone_unreal
 
-  ; test unreal mode
-  ;mov ebx, 0xcafecafe
-  ;mov eax, 0x200000
-  ;mov dword [ds:eax], ebx
-  ;mov ecx, [ds:eax]
-  ;xchg bx, bx
-  ;; Typing 'x 0x200000' in bochs debugger
-  ;; should return '0xcafecafe'.
+    ; test unreal mode
+    ;mov ebx, 0xcafecafe
+    ;mov eax, 0x200000
+    ;mov dword [ds:eax], ebx
+    ;mov ecx, [ds:eax]
+    ;xchg bx, bx
+    ;; Typing 'x 0x200000' in bochs debugger
+    ;; should return '0xcafecafe'.
 ; ===/
 
 ; === Memory Map ===/
 memory_map:
-  call make_mmap
-  or eax, eax
-  jnz .mmap_ok
+    call make_mmap
+    or eax, eax
+    jnz .mmap_ok
 
-  PRINT mm_failed
+    PRINT mm_failed
 .halt:
-  hlt
-  jmp .halt
+    hlt
+    jmp .halt
 
 .mmap_ok:
-  PRINT mm_ready
+    PRINT mm_ready
 
-  mov ebx, 24
-  mul ebx                   ; get mmap size in bytes
-  mov [mmap_length], eax    ; store length in multiboot structure field
+    mov ebx, 24
+    mul ebx                   ; get mmap size in bytes
+    mov [mmap_length], eax    ; store length in multiboot structure field
 ; ===/
 
 ; === Load kernel at 0x100000 (start of HMA, >= 1 Mb) ===/
-  push word [kernel_size]
-  push dword KERNEL_ADDRESS
-  push word [kernel_sector]
-  call read_disk32
-  add esi, 8
+    push word [kernel_size]
+    push dword KERNEL_ADDRESS
+    push word [kernel_sector]
+    call read_disk32
+    add esi, 8
 
-  PRINT kernel_loaded
+    PRINT kernel_loaded
 ; ===/
 
 ; === Enter Protected Mode ===
 
 enter_pm:
-  xor ax, ax        ; Clear AX register
-  mov ds, ax        ; Set DS-register to 0 - used by lgdt
+    xor ax, ax        ; Clear AX register
+    mov ds, ax        ; Set DS-register to 0 - used by lgdt
 
-  lgdt [gdt_desc]   ; Load the GDT descriptor
+    lgdt [gdt_desc]   ; Load the GDT descriptor
 
-  mov eax, cr0      ; Copy the contents of CR0 into EAX
-  or eax, 1         ; Set bit 0     (0xFE = Real Mode)
-  mov cr0, eax      ; Copy the contents of EAX into CR0
+    mov eax, cr0      ; Copy the contents of CR0 into EAX
+    or eax, 1         ; Set bit 0     (0xFE = Real Mode)
+    mov cr0, eax      ; Copy the contents of EAX into CR0
 
-  jmp 08h:kernel_segments ; Jump to code segment, offset kernel_segments
+    jmp 08h:kernel_segments ; Jump to code segment, offset kernel_segments
 
 
 BITS 32             ; We now need 32-bit instructions
 
 kernel_segments:
-  mov ax, 0x10      ; Save data segment identifier
-  mov ds, ax        ; Move a valid data segment into the data segment register
-  mov ss, ax        ; Move a valid data segment into the stack segment register
-  mov esp, 0x90000  ; Move the stack pointer to 090000h
+    mov ax, 0x10      ; Save data segment identifier
+    mov ds, ax        ; Move a valid data segment into the data segment register
+    mov ss, ax        ; Move a valid data segment into the stack segment register
+    mov esp, 0x90000  ; Move the stack pointer to 090000h
 
-  ; The presence of this value indicates to the kernel that it was loaded 
-  ; by a Multiboot-compliant boot loader.
-  mov eax, MULTIBOOT_BOOTLOADER_MAGIC
+    ; The presence of this value indicates to the kernel that it was loaded
+    ; by a Multiboot-compliant boot loader.
+    mov eax, MULTIBOOT_BOOTLOADER_MAGIC
 
-  mov ebx, multiboot_info
+    mov ebx, multiboot_info
 
-  jmp 08h:KERNEL_ADDRESS    ; Jump to section 08h (code), KERNEL_ADDRESS
+    jmp 08h:KERNEL_ADDRESS    ; Jump to section 08h (code), KERNEL_ADDRESS

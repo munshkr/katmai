@@ -19,8 +19,8 @@
 ;
 
 _gdtinfo:
-   dw _gdt_end - _gdt - 1   ;last byte in table
-   dd _gdt                 ;start of table
+     dw _gdt_end - _gdt - 1   ;last byte in table
+     dd _gdt                 ;start of table
 
 _gdt         dd 0,0        ; entry 0 is always unused
 flatdesc    db 0xff, 0xff, 0, 0, 0, 10010010b, 11001111b, 0
@@ -28,23 +28,23 @@ _gdt_end:
 
 
 enable_unreal_mode:
-  enter 0, 0
-  pushad
-  push ds                ; save real mode
+    enter 0, 0
+    pushad
+    push ds                ; save real mode
 
-  lgdt [_gdtinfo]         ; load gdt register
+    lgdt [_gdtinfo]         ; load gdt register
 
-  mov eax, cr0           ; switch to pmode by
-  or al, 1               ; set pmode bit
-  mov cr0, eax
+    mov eax, cr0           ; switch to pmode by
+    or al, 1               ; set pmode bit
+    mov cr0, eax
 
-  mov bx, 0x08           ; select descriptor 1
-  mov ds, bx             ; 8h = 1000b
+    mov bx, 0x08           ; select descriptor 1
+    mov ds, bx             ; 8h = 1000b
 
-  and al, 0xfe           ; back to realmode
-  mov cr0, eax           ; by toggling bit again
+    and al, 0xfe           ; back to realmode
+    mov cr0, eax           ; by toggling bit again
 
-  pop ds                 ; get back old segment
-  popad
-  leave
-  ret
+    pop ds                 ; get back old segment
+    popad
+    leave
+    ret

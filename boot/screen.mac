@@ -19,10 +19,10 @@
 ;
 
 %macro PRINT 1
-  mov si, %1
-  call bios_print
+    mov si, %1
+    call bios_print
 %endmacro
 
 %macro CLEAR 0
-  call bios_clear_screen
+    call bios_clear_screen
 %endmacro

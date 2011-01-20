@@ -40,25 +40,25 @@ loading        db "Loading second-stage bootloader...", 13, 10, 0
 ; == Bootsector Code ==
 
 start:
-  CLEAR                   ; Clear screen
-  PRINT loading           ; Print hello message
+    CLEAR                   ; Clear screen
+    PRINT loading           ; Print hello message
 
 ; === Load second-stage at STAGE2_ADDR (usable low-memory) ===
-  mov dx, STAGE2_ADDR
+    mov dx, STAGE2_ADDR
 
-  push S2SIZE
-  push dx
-  push 0
-  push 2
-  call read_disk
-  add sp, 8
+    push S2SIZE
+    push dx
+    push 0
+    push 2
+    call read_disk
+    add sp, 8
 
-  ; store kernel location on image disk (BOOTSIZE + S2SIZE + 1)
-  ; (ignore short `jmp _start --> jmp .+4` instruction (opcode: 'E9 04 00'))
-  mov word [edx + 3], S2SIZE + 2
-  mov word [edx + 5], KSIZE
+    ; store kernel location on image disk (BOOTSIZE + S2SIZE + 1)
+    ; (ignore short `jmp _start --> jmp .+4` instruction (opcode: 'E9 04 00'))
+    mov word [edx + 3], S2SIZE + 2
+    mov word [edx + 5], KSIZE
 
-  jmp 0:STAGE2_ADDR
+    jmp 0:STAGE2_ADDR
 
 
 ; If NASM throws "TIMES value is negative" here, it means we have

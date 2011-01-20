@@ -24,9 +24,9 @@ MULTIBOOT_INFO_FLAGS    equ MULTIBOOT_INFO_MEM_MAP
 
 
 multiboot_info:
-  dd MULTIBOOT_INFO_FLAGS
+    dd MULTIBOOT_INFO_FLAGS
 
-  times 10 dd 0
+    times 10 dd 0
 
-  mmap_length dd 0
-  dd MMAP_ADDRESS
+    mmap_length dd 0
+    dd MMAP_ADDRESS

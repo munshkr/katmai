@@ -29,18 +29,18 @@ global log10, pow
 %define result ebp-4
 
 log10:
-  PROLOGUE 4
+    PROLOGUE 4
 
-  fld1
-  fld dword [number]
-  fyl2x
-  fldl2t
-  fdivp st0
-  fst dword [result]
-  mov eax, [result]
+    fld1
+    fld dword [number]
+    fyl2x
+    fldl2t
+    fdivp st0
+    fst dword [result]
+    mov eax, [result]
 
-  EPILOGUE
-  ret
+    EPILOGUE
+    ret
 
 
 ; float pow(float base, float exponent);
@@ -50,21 +50,21 @@ log10:
 %define result    ebp-4
 
 pow:
-  PROLOGUE 4
+    PROLOGUE 4
 
-  fld dword [exponent]
-  fld dword [base]
-  fyl2x
-  fld st0
-  frndint
-  fsub st1,st0
-  fxch st1
-  f2xm1
-  fld1
-  faddp st0
-  fscale
-  fst dword [result]
-  mov eax, [result]
+    fld dword [exponent]
+    fld dword [base]
+    fyl2x
+    fld st0
+    frndint
+    fsub st1,st0
+    fxch st1
+    f2xm1
+    fld1
+    faddp st0
+    fscale
+    fst dword [result]
+    mov eax, [result]
 
-  EPILOGUE
-  ret
+    EPILOGUE
+    ret

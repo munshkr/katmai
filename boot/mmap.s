@@ -42,66 +42,66 @@ MMAP_ADDRESS equ 0x500
 %define mmap_entries bp-2
 
 make_mmap:
-  enter 2, 0
-  pushad
+    enter 2, 0
+    pushad
 
-  mov di, MMAP_ADDRESS    ; Init
-  xor ebx, ebx            ;
+    mov di, MMAP_ADDRESS    ; Init
+    xor ebx, ebx            ;
 
-  mov edx, 0x534d4150     ;
-  xor eax, eax            ;
-  mov eax, 0xe820         ; INT_0x15 EAX_0xE820 Setup & Call
-  mov ecx, 24             ;
-  int 0x15                ;
+    mov edx, 0x534d4150     ;
+    xor eax, eax            ;
+    mov eax, 0xe820         ; INT_0x15 EAX_0xE820 Setup & Call
+    mov ecx, 24             ;
+    int 0x15                ;
 
-  jc .failed              ;
-  mov edx, 0x534d4150     ;
-  cmp eax, edx            ;
-  jne .failed             ; Error check
-  cmp ebx, 0              ;
-  je .failed              ;
-  jmp .sucess             ;
+    jc .failed              ;
+    mov edx, 0x534d4150     ;
+    cmp eax, edx            ;
+    jne .failed             ; Error check
+    cmp ebx, 0              ;
+    je .failed              ;
+    jmp .sucess             ;
 
 .ignore:
 .loop:
-  cmp ebx, 0              ;
-  je .end                 ; Check for finish
+    cmp ebx, 0              ;
+    je .end                 ; Check for finish
 
-  mov edx, 0x534d4150     ;
-  xor eax, eax            ;
-  mov eax, 0xe820         ; INT_0x15 EAX_0xE820 Setup & Call
-  mov ecx, 24             ;
-  int 0x15                ;
+    mov edx, 0x534d4150     ;
+    xor eax, eax            ;
+    mov eax, 0xe820         ; INT_0x15 EAX_0xE820 Setup & Call
+    mov ecx, 24             ;
+    int 0x15                ;
 
-  jc .failed              ;
-  mov edx, 0x534d4150     ;
-  cmp eax, edx            ; Status check
-  jne .failed             ;
-  jmp .sucess             ;
+    jc .failed              ;
+    mov edx, 0x534d4150     ;
+    cmp eax, edx            ; Status check
+    jne .failed             ;
+    jmp .sucess             ;
 
 .failed:
-  popad
-  xor eax, eax
+    popad
+    xor eax, eax
 
-  leave
-  ret
+    leave
+    ret
 
 .sucess:
-  mov ecx, [es:di + 8]    ;
-  or ecx, [es:di + 12]    ; If the length of the entry is zero, ignore it
-  jz .ignore              ;
+    mov ecx, [es:di + 8]    ;
+    or ecx, [es:di + 12]    ; If the length of the entry is zero, ignore it
+    jz .ignore              ;
 
-  add di, 24
+    add di, 24
 
-  mov dx, [mmap_entries]  ;
-  inc dx                  ; Otherwise, increment and keep on maping
-  mov [mmap_entries], dx  ;
+    mov dx, [mmap_entries]  ;
+    inc dx                  ; Otherwise, increment and keep on maping
+    mov [mmap_entries], dx  ;
 
-  jmp .loop
+    jmp .loop
 
 .end:
-  popad
-  mov eax, [mmap_entries]
+    popad
+    mov eax, [mmap_entries]
 
-  leave
-  ret
+    leave
+    ret

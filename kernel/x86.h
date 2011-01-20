@@ -35,22 +35,22 @@ typedef char      int8_t;
 
 
 static inline void halt(void) {
-	__asm __volatile("hlt");
+    __asm __volatile("hlt");
 }
 
 /* Bochs magic breakpoint */
 static inline void debug(void) {
-  __asm __volatile("xchg %bx, %bx");
+    __asm __volatile("xchg %bx, %bx");
 }
 
 static inline void init_fpu(void) {
-	__asm __volatile("finit");
+    __asm __volatile("finit");
 }
 
 static inline void load_idt(void* base_addr) {
-  __asm __volatile("lidt (%0)"
-                   : /* no output */
-                   : "r" (base_addr));
+    __asm __volatile("lidt (%0)"
+                     : /* no output */
+                     : "r" (base_addr));
 }
 
 

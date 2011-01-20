@@ -19,8 +19,8 @@
 ;
 
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
-  global isr%1          ; %1 accesses the first parameter.
-  isr%1:
+global isr%1            ; %1 accesses the first parameter.
+isr%1:
     cli
     push byte 0
     push byte %1
@@ -28,8 +28,8 @@
 %endmacro
 
 %macro ISR_ERRCODE 1
-  global isr%1
-  isr%1:
+global isr%1
+isr%1:
     cli
     push byte %1
     jmp isr_common_stub
@@ -75,26 +75,26 @@ extern isr_handler
 ; up for kernel mode segments, calls the C-level fault handler,
 ; and finally restores the stack frame.
 isr_common_stub:
-   pushad               ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+     pushad               ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 
-   mov ax, ds           ; Lower 16-bits of eax = ds.
-   push eax             ; Save the data segment descriptor
+     mov ax, ds           ; Lower 16-bits of eax = ds.
+     push eax             ; Save the data segment descriptor
 
-   mov ax, 0x10         ; Load the kernel data segment descriptor
-   mov ds, ax
-   mov es, ax
-   mov fs, ax
-   mov gs, ax
+     mov ax, 0x10         ; Load the kernel data segment descriptor
+     mov ds, ax
+     mov es, ax
+     mov fs, ax
+     mov gs, ax
 
-   call isr_handler
+     call isr_handler
 
-   pop eax              ; Reload the original data segment descriptor
-   mov ds, ax
-   mov es, ax
-   mov fs, ax
-   mov gs, ax
+     pop eax              ; Reload the original data segment descriptor
+     mov ds, ax
+     mov es, ax
+     mov fs, ax
+     mov gs, ax
 
-   popad                ; Pops edi,esi,ebp...
-   add esp, 8           ; Cleans up the pushed error code and pushed ISR number
-   sti
-   iret                 ; Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+     popad                ; Pops edi,esi,ebp...
+     add esp, 8           ; Cleans up the pushed error code and pushed ISR number
+     sti
+     iret                 ; Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP

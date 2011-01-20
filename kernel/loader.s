@@ -32,24 +32,24 @@ extern kmain
 
 start:
 _start:
-  jmp multiboot_entry
+    jmp multiboot_entry
 
-  align 4
+    align 4
 
 multiboot_header:
-  dd MULTIBOOT_HEADER_MAGIC
-  dd MULTIBOOT_HEADER_FLAGS
-  dd MULTIBOOT_HEADER_CHECKSUM
+    dd MULTIBOOT_HEADER_MAGIC
+    dd MULTIBOOT_HEADER_FLAGS
+    dd MULTIBOOT_HEADER_CHECKSUM
 
 multiboot_entry:
-  push 0      ; reset EFLAGS
-  popf
+    push 0      ; reset EFLAGS
+    popf
 
-  push ebx    ; push the pointer to the Multiboot information structure
-  push eax    ; push the magic value
+    push ebx    ; push the pointer to the Multiboot information structure
+    push eax    ; push the magic value
 
-  call kmain
+    call kmain
 
 halt:
-  hlt
-  jmp halt
+    hlt
+    jmp halt

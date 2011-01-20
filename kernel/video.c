@@ -30,110 +30,110 @@ char forecolor = C_LIGHT_GRAY;
 
 
 void clear(void) {
-  // FIXME Maybe we should write a memset()?
-  short *pos = (short *) VGA_TEXT_BUFFER;
-  for (int i=0; i < MAX_COLS * MAX_ROWS; ++i) {
-    *pos++ = 0;
-  }
-  x = 0;
-  y = 0;
+    // FIXME Maybe we should write a memset()?
+    short *pos = (short *) VGA_TEXT_BUFFER;
+    for (int i=0; i < MAX_COLS * MAX_ROWS; ++i) {
+        *pos++ = 0;
+    }
+    x = 0;
+    y = 0;
 }
 
 void scroll(void) {
-  short *pos = (short *) VGA_TEXT_BUFFER;
-  short *cur_pos = pos + MAX_COLS;
-  for (int row=1; row < MAX_ROWS; ++row) {
-    for (int col=0; col < MAX_COLS; ++col) {
-      *pos++ = *cur_pos++;
+    short *pos = (short *) VGA_TEXT_BUFFER;
+    short *cur_pos = pos + MAX_COLS;
+    for (int row=1; row < MAX_ROWS; ++row) {
+        for (int col=0; col < MAX_COLS; ++col) {
+            *pos++ = *cur_pos++;
+        }
     }
-  }
-  for (int col=0; col < MAX_COLS; ++col) {
-    *pos++ = 0;
-  }
+    for (int col=0; col < MAX_COLS; ++col) {
+        *pos++ = 0;
+    }
 }
 
 void putc(char c) {
-  char attrib = (backcolor << 4) | (forecolor & 0x0f);
-  volatile short *pos;
-  pos = (short *) VGA_TEXT_BUFFER + (y * MAX_COLS + x);
-  *pos = c | (attrib << 8);
-  x++;
-  if (x == MAX_COLS) {
-    putln();
-  }
+    char attrib = (backcolor << 4) | (forecolor & 0x0f);
+    volatile short *pos;
+    pos = (short *) VGA_TEXT_BUFFER + (y * MAX_COLS + x);
+    *pos = c | (attrib << 8);
+    x++;
+    if (x == MAX_COLS) {
+        putln();
+    }
 }
 
 void putln(void) {
-  x = 0;
-  y++;
-  if (y == MAX_ROWS) {
-    scroll();
-    y--;
-  }
+    x = 0;
+    y++;
+    if (y == MAX_ROWS) {
+        scroll();
+        y--;
+    }
 }
 
 void print(char *message) {
-  while (*message) {
-    putc(*message++);
-  }
+    while (*message) {
+        putc(*message++);
+    }
 }
 
 void println(char *message) {
-  print(message);
-  putln();
+    print(message);
+    putln();
 }
 
 
 /* Get number of digits of a number */
 uint32_t len(const int32_t number, const uint8_t base) {
-  uint32_t length = 1;
-  uint32_t div = ABS(number);
+    uint32_t length = 1;
+    uint32_t div = ABS(number);
 
-  while (div) {
-    div /= base;
-    if (!div) break;
-    length++;
-  }
+    while (div) {
+        div /= base;
+        if (!div) break;
+        length++;
+    }
 
-  return length;
+    return length;
 }
 
 /* Exponentiation function */
 uint32_t v_pow(const int32_t base, const uint32_t exponent) {
-  uint32_t i;
-  uint32_t res = 1;
+    uint32_t i;
+    uint32_t res = 1;
 
-  for (i = 0; i < exponent; ++i) {
-    res *= base;
-  }
+    for (i = 0; i < exponent; ++i) {
+        res *= base;
+    }
 
-  return res;
+    return res;
 }
 
 void print_base(int32_t number, uint8_t base) {
-  uint32_t i, digit;
-  const uint32_t ln = len(number, base);
-  uint32_t mult = v_pow(base, ln - 1);
+    uint32_t i, digit;
+    const uint32_t ln = len(number, base);
+    uint32_t mult = v_pow(base, ln - 1);
 
-  if (number < 0) {
-    putc('-');
-    number = -number;
-  }
-
-  if (base == 16) {
-    putc('0');
-    putc('x');
-  }
-
-  for (i = 0; i < ln; ++i) {
-    digit = (number / mult) % base;
-    if (digit < 10) {
-      putc((char) digit + ASCII_0);
-    } else if (digit < 35) {
-      putc((char) (digit - 10) + ASCII_a);
-    } else {
-      putc('?');
+    if (number < 0) {
+        putc('-');
+        number = -number;
     }
-    mult /= base;
-  }
+
+    if (base == 16) {
+        putc('0');
+        putc('x');
+    }
+
+    for (i = 0; i < ln; ++i) {
+        digit = (number / mult) % base;
+        if (digit < 10) {
+            putc((char) digit + ASCII_0);
+        } else if (digit < 35) {
+            putc((char) (digit - 10) + ASCII_a);
+        } else {
+            putc('?');
+        }
+        mult /= base;
+    }
 }
