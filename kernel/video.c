@@ -28,28 +28,22 @@ int y = 0;
 char backcolor = C_BLACK;
 char forecolor = C_LIGHT_GRAY;
 
+/* Scroll screen one row up */
+static void scroll(void);
+/* Update cursor */
+static void update_cursor(void);
+
+
 
 void clear(void) {
-    // FIXME Maybe we should write a memset()?
+    // FIXME Use string's memset here
     short *pos = (short *) VGA_TEXT_BUFFER;
     for (int i=0; i < MAX_COLS * MAX_ROWS; ++i) {
         *pos++ = 0;
     }
     x = 0;
     y = 0;
-}
-
-void scroll(void) {
-    short *pos = (short *) VGA_TEXT_BUFFER;
-    short *cur_pos = pos + MAX_COLS;
-    for (int row=1; row < MAX_ROWS; ++row) {
-        for (int col=0; col < MAX_COLS; ++col) {
-            *pos++ = *cur_pos++;
-        }
-    }
-    for (int col=0; col < MAX_COLS; ++col) {
-        *pos++ = 0;
-    }
+    update_cursor();
 }
 
 void putc(char c) {
@@ -70,12 +64,15 @@ void putln(void) {
         scroll();
         y--;
     }
+    update_cursor();
 }
 
 void print(char *message) {
+    // TODO Hide cursor until print is over
     while (*message) {
         putc(*message++);
     }
+    update_cursor();
 }
 
 void println(char *message) {
@@ -136,4 +133,30 @@ void print_base(int32_t number, uint8_t base) {
         }
         mult /= base;
     }
+}
+
+
+static void scroll(void) {
+    short *pos = (short *) VGA_TEXT_BUFFER;
+    short *cur_pos = pos + MAX_COLS;
+    for (int row=1; row < MAX_ROWS; ++row) {
+        for (int col=0; col < MAX_COLS; ++col) {
+            *pos++ = *cur_pos++;
+        }
+    }
+    for (int col=0; col < MAX_COLS; ++col) {
+        *pos++ = 0;
+    }
+}
+
+static void update_cursor(void) {
+    uint16_t location = y * MAX_COLS + x;
+
+    // FIXME The base port (here assumed to be 0x3d4 and 0x3d5)
+    // should be read from the BIOS data area.
+
+    outb(0x3d4, 14);            // Send the high cursor byte
+    outb(0x3d5, location >> 8);
+    outb(0x3d4, 15);            // Send the low cursor byte
+    outb(0x3d5, location);
 }

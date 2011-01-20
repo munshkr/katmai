@@ -41,15 +41,16 @@
 
 /* Clear screen */
 void clear(void);
-/* Scroll screen one row up */
-void scroll(void);
 
 /* Put char at current position */
 void putc(char);
+
 /* New line */
 void putln(void);
+
 /* Put string at current position */
 void print(char*);
+
 /* Put string at current position and linefeed */
 void println(char*);
 

@@ -48,9 +48,12 @@ static inline void init_fpu(void) {
 }
 
 static inline void load_idt(void* base_addr) {
-    __asm __volatile("lidt (%0)"
-                     : /* no output */
-                     : "r" (base_addr));
+    __asm __volatile("lidt (%0)" : : "r" (base_addr));
+}
+
+/* Write a byte out to the specified port. */
+static inline void outb(uint16_t port, uint8_t value) {
+    __asm __volatile("outb %1, %0" : : "dN" (port), "a" (value));
 }
 
 
