@@ -23,15 +23,11 @@
 #define __DESCRIPTOR_TABLES_H__
 
 
+#include "x86.h"
 #include "string.h"
 
 
 void init_idt();
-
-
-const uint32_t CODE_SEGMENT    = 0x08;
-const uint32_t INT_GATE_FLAGS  = 0x8E;
-const uint32_t TRAP_GATE_FLAGS = 0x8F;
 
 
 /* A struct describing an interrupt gate */
