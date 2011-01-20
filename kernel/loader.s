@@ -18,7 +18,7 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-%include "kernel/multiboot.s"
+%include "kernel/multiboot.mac"
 
 %define MULTIBOOT_HEADER_FLAGS (MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO)
 %define MULTIBOOT_HEADER_CHECKSUM -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)

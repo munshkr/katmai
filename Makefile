@@ -11,7 +11,7 @@ AUXFILES := Makefile README.rst COPYING bochsrc doc
 BOOTDIR := boot
 KERNELDIRS := kernel
 
-ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 \( -name "*.s" -not -name "loader.s" -not -name "multiboot.s" \))
+ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 \( -name "*.s" -not -name "loader.s" \))
 SRCFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.c")
 HDRFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.h")
 
