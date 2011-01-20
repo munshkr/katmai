@@ -47,5 +47,11 @@ static inline void init_fpu(void) {
 	__asm __volatile("finit");
 }
 
+static inline void load_idt(void* base_addr) {
+  __asm __volatile("lidt (%0)"
+                   : /* no output */
+                   : "r" (base_addr));
+}
+
 
 #endif /* __X86_H__ */

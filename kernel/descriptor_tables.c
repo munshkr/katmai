@@ -21,7 +21,7 @@
 
 #include "descriptor_tables.h"
 
-extern void load_idt(uint32_t base_addr);
+
 static void idt_set_gate(uint8_t index, uint32_t offset, uint16_t selector, uint8_t flags);
 
 
@@ -70,7 +70,7 @@ void init_idt()
    idt_set_gate(30, (uint32_t) isr30, CODE_SEGMENT, INT_GATE_FLAGS);
    idt_set_gate(31, (uint32_t) isr31, CODE_SEGMENT, INT_GATE_FLAGS);
 
-   load_idt((uint32_t) &idt_ptr);
+   load_idt((void *) &idt_ptr);
 }
 
 static void idt_set_gate(uint8_t index, uint32_t offset, uint16_t selector, uint8_t flags)
