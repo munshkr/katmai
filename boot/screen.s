@@ -18,6 +18,15 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+%macro PRINT 1
+    mov si, %1
+    call bios_print
+%endmacro
+
+%macro CLEAR 0
+    call bios_clear_screen
+%endmacro
+
 
 ; To be deleted - Not needed here
 bios_clear_screen:

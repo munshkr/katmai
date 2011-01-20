@@ -30,7 +30,6 @@ jmp start
 
 ; BIOS screen subroutines
 %include "boot/screen.s"
-%include "boot/screen.mac"
 %include "boot/disk.s"
 
 

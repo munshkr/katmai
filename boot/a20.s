@@ -8,8 +8,6 @@
 ; Contact me at jamesamc@yahoo.com about any bugs or problems.
 ;
 
-;%include "boot/screen.mac"
-
 
 m_a20_fail  db "Failed to enable A20 line! Halted.", 13, 10, 0
 m_a20_warn  db "Used non-standard method for enabling A20 line.", 13, 10, 0

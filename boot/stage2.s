@@ -40,16 +40,15 @@ _start:
 
 
 ; Messages
-stage2_init db "Running Second-stage", 13, 10, 0
-a20_enabled db "A20 line enabled", 13, 10, 0
-gone_unreal db "Gone Unreal", 13, 10, 0
+stage2_init   db "Running Second-stage", 13, 10, 0
+a20_enabled   db "A20 line enabled", 13, 10, 0
+gone_unreal   db "Gone Unreal", 13, 10, 0
 kernel_loaded db "Kernel loaded", 13, 10, 0
-mm_failed db "Memory Map function failed", 13, 10, 0
-mm_ready db "Memory Map stored!", 13, 10, 0
+mm_failed     db "Memory Map function failed", 13, 10, 0
+mm_ready      db "Memory Map stored!", 13, 10, 0
 
 ; Routines and macros
 %include "boot/screen.s"
-%include "boot/screen.mac"
 
 %include "boot/a20.s"
 %include "boot/unreal.s"
