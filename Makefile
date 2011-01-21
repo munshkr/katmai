@@ -66,6 +66,9 @@ todolist:
 
 -include $(DEPFILES)
 
+kernel: $(KERNEL_BIN)
+boot: $(BOOT_BIN)
+
 $(KERNEL_BIN): $(OBJFILES)
 	@$(ECHO) "$(BULLET_STRING) $(STEP_COLOR)Linking: $@$(NO_COLOR)"
 	$(LD) $(LDFLAGS) -o $@ $(OBJFILES)
