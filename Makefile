@@ -33,13 +33,8 @@ KERNEL_BIN := kernel.bin
 DISKIMAGE := diskette.img
 TAR_FILE := katmai.tar.gz
 
-# TODO Check if these ultra-paranoid gcc flags are useful
-# CFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
-# 				  -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
-# 				  -Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-# 				  -Wconversion -Wstrict-prototypes
-CFLAGS := -Wall -Wextra -Werror -ffreestanding -fno-builtin -nostdlib \
-				  -nostartfiles -nodefaultlibs
+CFLAGS := -ffreestanding -fno-builtin -nostdlib -nostartfiles -nodefaultlibs \
+					-Wall -Wextra -Werror -pedantic
 LDFLAGS := -melf_i386 -belf32-i386 --oformat binary \
 				   -Tkernel/link.ld
 
