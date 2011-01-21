@@ -41,7 +41,7 @@ void init_idt()
 
      memset((uint32_t*) &idt_entries, 0, sizeof(idt_entry_t) * 256);
 
-     /* TODO ? Put ISR functions inside an array and make this a for loop */
+     // TODO ? Put ISR functions inside an array and make this a for loop
      idt_set_gate( 0, (uint32_t) isr0 , CODE_SEGMENT, INT_GATE_FLAGS);
      idt_set_gate( 1, (uint32_t) isr1 , CODE_SEGMENT, INT_GATE_FLAGS);
      idt_set_gate( 2, (uint32_t) isr2 , CODE_SEGMENT, INT_GATE_FLAGS);
@@ -85,7 +85,7 @@ static void idt_set_gate(uint8_t index, uint32_t offset, uint16_t selector, uint
 
      idt_entries[index].selector = selector;
      idt_entries[index].reserved = 0;
-     /* We must uncomment the OR below when we get to using user-mode.
-        It sets the interrupt gate's privilege level to 3. */
+     // We must uncomment the OR below when we get to using user-mode.
+     // It sets the interrupt gate's privilege level to 3.
      idt_entries[index].flags = flags /* | 0x60 */;
 }

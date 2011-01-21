@@ -31,7 +31,7 @@
 #define MAX_COLS 80
 #define MAX_ROWS 25
 
-/* Colors */
+// Colors
 #define C_BLACK 0x00
 #define C_LIGHT_GRAY 0x07
 
@@ -39,19 +39,19 @@
 #define ASCII_a 0x61
 
 
-/* Clear screen */
+// Clear screen
 void clear(void);
 
-/* Put char at current position */
+// Put char at current position
 void putc(char);
 
-/* New line */
+// New line
 void putln(void);
 
-/* Put string at current position */
+// Put string at current position
 void print(char*);
 
-/* Put string at current position and linefeed */
+// Put string at current position and linefeed
 void println(char*);
 
 void print_base(int32_t number, uint8_t base);

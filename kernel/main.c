@@ -34,7 +34,7 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
         return;
     }
 
-	/* Check if the cpuid instruction is available */
+	// Check if the cpuid instruction is available
 	if (check_cpuid()) {
 		println("CPUID available");
 		if (check_apic()) {
@@ -46,14 +46,13 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
 		println("CPUID not available");
 	}
 
-    /* Init the floating point unit */
+    // Init the floating point unit
     init_fpu();
 
-    /* Initialize the Interrupt Descriptor Table and
-       Interrupt Service Routines */
+    // Initialize the Interrupt Descriptor Table and Interrupt Service Routines
     init_idt();
 
-    /* Print (if available) memory map */
+    // Print (if available) memory map
     if (mbi->flags && MULTIBOOT_INFO_MEM_MAP) {
         uint32_t mmap_entries = mbi->mmap_length / 24;
 
@@ -75,6 +74,6 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
         }
     }
 
-    /* Test breakpoint interrupt */
+    // Test breakpoint interrupt
     __asm __volatile("int $0x3");
 }

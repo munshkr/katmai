@@ -34,14 +34,14 @@ typedef int       int32_t;
 typedef short     int16_t;
 typedef char      int8_t;
 
-extern bool check_cpuid();
-extern bool check_apic();
+extern bool check_cpuid(void);
+extern bool check_apic(void);
 
 static inline void halt(void) {
     __asm __volatile("hlt");
 }
 
-/* Bochs magic breakpoint */
+// Bochs magic breakpoint
 static inline void debug(void) {
     __asm __volatile("xchg %bx, %bx");
 }
@@ -54,7 +54,7 @@ static inline void load_idt(void* base_addr) {
     __asm __volatile("lidt (%0)" : : "r" (base_addr));
 }
 
-/* Write a byte out to the specified port. */
+// Write a byte out to the specified port
 static inline void outb(uint16_t port, uint8_t value) {
     __asm __volatile("outb %1, %0" : : "dN" (port), "a" (value));
 }

@@ -22,15 +22,15 @@
 #include "video.h"
 
 
-/* global cursor */
+// Global cursor
 int x = 0;
 int y = 0;
 char backcolor = C_BLACK;
 char forecolor = C_LIGHT_GRAY;
 
-/* Scroll screen one row up */
+// Scroll screen one row up
 static void scroll(void);
-/* Update cursor */
+// Update cursor
 static void update_cursor(void);
 
 
@@ -81,7 +81,7 @@ void println(char *message) {
 }
 
 
-/* Get number of digits of a number */
+// Get number of digits of a number
 uint32_t len(const int32_t number, const uint8_t base) {
     uint32_t length = 1;
     uint32_t div = ABS(number);
@@ -95,7 +95,7 @@ uint32_t len(const int32_t number, const uint8_t base) {
     return length;
 }
 
-/* Exponentiation function */
+// Exponentiation function
 uint32_t v_pow(const int32_t base, const uint32_t exponent) {
     uint32_t i;
     uint32_t res = 1;

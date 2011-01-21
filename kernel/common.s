@@ -23,10 +23,10 @@ check_cpuid:
 
 check_apic:
     PROLOGUE 0
-    mov eax, 1              ; Parámetro para cpuid
+    mov eax, 1              ; CPUID parameter
     cpuid
-    and edx, ACPI_MASK      ; Enmascaro el bit 9
-    shr edx, 9
-    mov eax, edx            ; Lo paso al bit 1 y de ahi a eax para resultado
+    and edx, ACPI_MASK      ; Mask 9th bit
+    shr edx, 9              ; Move result to least significant bit
+    mov eax, edx            ; and return it
     EPILOGUE
     ret
