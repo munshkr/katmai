@@ -34,6 +34,18 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
         return;
     }
 
+	/* Check if the cpuid instruction is available */
+	if (check_cpuid()) {
+		println("CPUID available");
+		if (check_apic()) {
+			println("APIC available");
+		} else {
+			println("APIC no available");
+		}
+	} else {
+		println("CPUID not available");
+	}
+
     /* Init the floating point unit */
     init_fpu();
 
