@@ -54,6 +54,13 @@ static inline void load_idt(void* base_addr) {
     __asm __volatile("lidt (%0)" : : "r" (base_addr));
 }
 
+// Read a byte in the specified port
+static inline uint8_t inb(uint16_t port) {
+   uint8_t ret;
+   __asm __volatile("inb %1, %0" : "=a" (ret) : "dN" (port));
+   return ret;
+}
+
 // Write a byte out to the specified port
 static inline void outb(uint16_t port, uint8_t value) {
     __asm __volatile("outb %1, %0" : : "dN" (port), "a" (value));
