@@ -29,6 +29,11 @@
 #include "common.h"
 
 
+// PIC vector offsets set _just above_ IA-32 exceptions
+#define PIC1_OFFSET     0x20
+#define PIC2_OFFSET     0x28
+
+
 // Commands for the 8259 PIC
 #define PIC1            0x20      // IO base address for master PIC
 #define PIC2            0xA0      // IO base address for slave PIC
@@ -52,10 +57,6 @@
 
 // End-of-interrupt command code
 #define PIC_EOI         0x20
-
-// PIC vector offsets set _just above_ IA-32 exceptions
-#define PIC1_OFFSET     0x20
-#define PIC2_OFFSET     0x28
 
 // IRQs mapping is defined here
 #define IRQ0  (PIC1_OFFSET+0)

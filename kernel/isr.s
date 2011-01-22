@@ -18,6 +18,10 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+; If you change these offsets, remember to update in `isr_hi.h`
+%define PIC1_OFFSET     0x20
+%define PIC2_OFFSET     0x28
+
 %macro ISR_NOERRCODE 1
   global isr%1
   isr%1:
@@ -77,22 +81,23 @@ ISR_NOERRCODE 29
 ISR_NOERRCODE 30
 ISR_NOERRCODE 31
 
-IRQ  0, 32
-IRQ  1, 33
-IRQ  2, 34
-IRQ  3, 35
-IRQ  4, 36
-IRQ  5, 37
-IRQ  6, 38
-IRQ  7, 39
-IRQ  8, 40
-IRQ  9, 41
-IRQ 10, 42
-IRQ 11, 43
-IRQ 12, 44
-IRQ 13, 45
-IRQ 14, 46
-IRQ 15, 47
+IRQ  0, (PIC1_OFFSET+0)
+IRQ  1, (PIC1_OFFSET+1)
+IRQ  2, (PIC1_OFFSET+2)
+IRQ  3, (PIC1_OFFSET+3)
+IRQ  4, (PIC1_OFFSET+4)
+IRQ  5, (PIC1_OFFSET+5)
+IRQ  6, (PIC1_OFFSET+6)
+IRQ  7, (PIC1_OFFSET+7)
+
+IRQ  8, (PIC2_OFFSET+0)
+IRQ  9, (PIC2_OFFSET+1)
+IRQ 10, (PIC2_OFFSET+2)
+IRQ 11, (PIC2_OFFSET+3)
+IRQ 12, (PIC2_OFFSET+4)
+IRQ 13, (PIC2_OFFSET+5)
+IRQ 14, (PIC2_OFFSET+6)
+IRQ 15, (PIC2_OFFSET+7)
 
 
 ; Defined in isr_hi.c
