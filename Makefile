@@ -7,25 +7,29 @@ BULLET_STRING := $(BULLET_COLOR)>>$(NO_COLOR)
 
 ECHO := /bin/echo -e
 
-AUXFILES := Makefile README.rst COPYING bochsrc doc
+# Directories
 BOOTDIR := boot
 KERNELDIRS := kernel
+LOADER := loader.s
 
-ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 \( -name "*.s" -not -name "loader.s" \))
+AUXFILES := Makefile README.rst COPYING bochsrc doc
+LOADERFILE := $(shell find $(KERNELDIRS) -mindepth 1 -name $(LOADER))
+ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 \( -name "*.s" -not -name $(LOADER) \))
 SRCFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.c")
 HDRFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.h")
+MACFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.mac")
 
-KERNELSRCFILES := $(ASMFILES) $(SRCFILES) $(HDRFILES)
+KERNELSRCFILES := $(ASMFILES) $(SRCFILES) $(HDRFILES) $(LOADERFILE) $(MACFILES)
 BOOTSRCFILES := $(shell find $(BOOTDIR) -mindepth 1 -name "*.s")
 
 ALLFILES := $(BOOTSRCFILES) $(KERNELSRCFILES) $(AUXFILES)
 
 # kernel/loader.o must be linked first when compiling kernel binary
 OBJFILES := kernel/loader.o
-OBJFILES += $(patsubst %.s,%.o,$(ASMFILES))
-OBJFILES += $(patsubst %.c,%.o,$(SRCFILES))
+OBJFILES += $(patsubst %.s, %.o, $(ASMFILES))
+OBJFILES += $(patsubst %.c, %.o, $(SRCFILES))
 
-DEPFILES := $(patsubst %.c,%.d,$(SRCFILES))
+DEPFILES := $(patsubst %.c, %.d, $(SRCFILES))
 
 BOOT_BIN := boot.bin
 STAGE2_BIN := stage2.bin
