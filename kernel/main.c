@@ -23,6 +23,7 @@
 #include "multiboot.h"
 #include "descriptor_tables.h"
 #include "video.h"
+#include "timer.h"
 
 
 void kmain(uint32_t magic, multiboot_info_t* mbi) {
@@ -76,4 +77,6 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
 
     // Test breakpoint interrupt
     __asm __volatile("int $0x3");
+
+    init_timer(50); // Initialise timer to 50Hz
 }
