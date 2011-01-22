@@ -78,26 +78,25 @@ void init_idt()
     // conflicts with the CPU exception interrupts in protected mode,
     // the Master PIC needs to be remapped.
 
-    // We set them to 0x20 (i.e. 32, just after IA-32 exceptions) and 0x70
-    // (same as before for slave PIC).
-    remap_pics(0x20, 0x70);
+    remap_pics(PIC1_OFFSET, PIC2_OFFSET);
 
-    idt_set_gate(32, (uint32_t) irq0 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(33, (uint32_t) irq1 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(34, (uint32_t) irq2 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(35, (uint32_t) irq3 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(36, (uint32_t) irq4 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(37, (uint32_t) irq5 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(38, (uint32_t) irq6 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(39, (uint32_t) irq7 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(40, (uint32_t) irq8 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(41, (uint32_t) irq9 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(42, (uint32_t) irq10, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(43, (uint32_t) irq11, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(44, (uint32_t) irq12, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(45, (uint32_t) irq13, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(46, (uint32_t) irq14, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(47, (uint32_t) irq15, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+0, (uint32_t) irq0 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+1, (uint32_t) irq1 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+2, (uint32_t) irq2 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+3, (uint32_t) irq3 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+4, (uint32_t) irq4 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+5, (uint32_t) irq5 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+6, (uint32_t) irq6 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC1_OFFSET+7, (uint32_t) irq7 , CODE_SEGMENT, INT_GATE_FLAGS);
+
+    idt_set_gate(PIC2_OFFSET+0, (uint32_t) irq8 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+1, (uint32_t) irq9 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+2, (uint32_t) irq10, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+3, (uint32_t) irq11, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+4, (uint32_t) irq12, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+5, (uint32_t) irq13, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+6, (uint32_t) irq14, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(PIC2_OFFSET+7, (uint32_t) irq15, CODE_SEGMENT, INT_GATE_FLAGS);
 
     // Finally load the IDT base address in the LIDT register
     load_idt((void *) &idt_ptr);

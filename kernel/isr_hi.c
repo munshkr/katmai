@@ -26,7 +26,40 @@
 #include "video.h"
 
 
+static void send_EOI(uint8_t irq);
+
+
+isr_t interrupt_handlers[256];
+
+
 // This gets called from our ASM interrupt handler stub
 void isr_handler(registers_t regs) {
     print("Received interrupt: "); PRINT_DEC(regs.int_no); putln();
+}
+
+// This gets called from our ASM interrupt handler stub
+void irq_handler(registers_t regs)
+{
+    // Send an EOI (end of interrupt) signal to the PICs
+    send_EOI(regs.u.irq);
+
+    if (interrupt_handlers[regs.int_no] != 0) {
+        isr_t handler = interrupt_handlers[regs.int_no];
+        handler(regs);
+    }
+}
+
+void register_interrupt_handler(uint8_t n, isr_t handler) {
+  interrupt_handlers[n] = handler;
+}
+
+
+static void send_EOI(uint8_t irq)
+{
+    // If this interrupt involved the slave, send reset signal
+    if (irq >= 8)
+        outb(PIC2_COMMAND, PIC_EOI);
+
+    // Send reset signal to master
+    outb(PIC1_COMMAND, PIC_EOI);
 }
