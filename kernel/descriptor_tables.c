@@ -26,11 +26,6 @@ static void idt_set_gate(uint8_t index, uint32_t offset, uint16_t selector, uint
 static void remap_pics(uint32_t offset1, uint32_t offset2);
 
 
-const uint32_t CODE_SEGMENT    = 0x08;
-const uint32_t INT_GATE_FLAGS  = 0x8E;
-const uint32_t TRAP_GATE_FLAGS = 0x8F;
-
-
 idt_entry_t idt_entries[256] __attribute__ ((aligned (8)));
 idt_ptr_t   idt_ptr;
 

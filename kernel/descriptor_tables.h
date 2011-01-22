@@ -27,6 +27,12 @@
 #include "string.h"
 
 
+#define CODE_SEGMENT    0x08
+#define INT_GATE_FLAGS  0x8E
+#define TRAP_GATE_FLAGS 0x8F
+
+
+
 void init_idt(void);
 
 
