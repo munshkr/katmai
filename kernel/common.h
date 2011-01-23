@@ -23,6 +23,8 @@
 #define __COMMON_H__
 
 
+#define ABS(n)  (n > 0 ? n : -n)
+
 typedef unsigned long long uint64_t;
 typedef unsigned int       uint32_t;
 typedef unsigned short     uint16_t;

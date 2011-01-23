@@ -34,7 +34,7 @@ isr_t interrupt_handlers[256];
 
 // This gets called from our ASM interrupt handler stub
 void isr_handler(registers_t regs) {
-    print("Received interrupt: "); PRINT_DEC(regs.int_no); putln();
+    printf("Received interrupt: %u\n", regs.int_no);
 }
 
 // This gets called from our ASM interrupt handler stub

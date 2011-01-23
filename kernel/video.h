@@ -23,8 +23,8 @@
 #define __VIDEO_H__
 
 
+#include "stdarg.h"
 #include "common.h"
-#include "math.h"
 
 
 #define VGA_TEXT_BUFFER 0xb8000
@@ -38,26 +38,12 @@
 #define ASCII_0 0x30
 #define ASCII_a 0x61
 
+#define TAB_WIDTH 4
 
-// Clear screen
+
 void clear(void);
-
-// Put char at current position
-void putc(char);
-
-// New line
-void putln(void);
-
-// Put string at current position
-void print(char*);
-
-// Put string at current position and linefeed
-void println(char*);
-
-void print_base(int32_t number, uint8_t base);
-
-#define PRINT_DEC(n) print_base(n, 10)
-#define PRINT_HEX(n) print_base(n, 16)
+int putchar(const char c);
+int printf(const char* format, ...);
 
 
 #endif /* __VIDEO_H__ */

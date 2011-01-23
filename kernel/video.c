@@ -22,17 +22,23 @@
 #include "video.h"
 
 
+static void scroll(void);
+static void putln(void);
+static void update_cursor(void);
+
+static unsigned int len(const int number, const char base);
+static unsigned int ulen(const unsigned int number, const char base);
+static int pow(const int base, const unsigned int exponent);
+static int print_dec(const int number);
+static int print_udec(const unsigned int number);
+static int print_uhex(const unsigned int number);
+
+
 // Global cursor
 int x = 0;
 int y = 0;
 char backcolor = C_BLACK;
 char forecolor = C_LIGHT_GRAY;
-
-// Scroll screen one row up
-static void scroll(void);
-// Update cursor
-static void update_cursor(void);
-
 
 
 void clear(void) {
@@ -46,93 +52,78 @@ void clear(void) {
     update_cursor();
 }
 
-void putc(char c) {
-    char attrib = (backcolor << 4) | (forecolor & 0x0f);
-    volatile short *pos;
-    pos = (short *) VGA_TEXT_BUFFER + (y * MAX_COLS + x);
-    *pos = c | (attrib << 8);
-    x++;
-    if (x == MAX_COLS) {
+int putchar(const char c) {
+    if (c == '\n') {
+        putln();
+    } else if (c == '\t') {
+        x += TAB_WIDTH;
+    } else {
+        char attrib = (backcolor << 4) | (forecolor & 0x0f);
+        volatile short *pos;
+        pos = (short *) VGA_TEXT_BUFFER + (y * MAX_COLS + x);
+        *pos = c | (attrib << 8);
+        x++;
+    }
+    if (x >= MAX_COLS) {
         putln();
     }
-}
-
-void putln(void) {
-    x = 0;
-    y++;
-    if (y == MAX_ROWS) {
-        scroll();
-        y--;
-    }
-    update_cursor();
-}
-
-void print(char *message) {
-    // TODO Hide cursor until print is over
-    while (*message) {
-        putc(*message++);
-    }
-    update_cursor();
-}
-
-void println(char *message) {
-    print(message);
-    putln();
+    return c;
 }
 
 
-// Get number of digits of a number
-uint32_t len(const int32_t number, const uint8_t base) {
-    uint32_t length = 1;
-    uint32_t div = ABS(number);
+/* Stripped down version of C standard `printf` with only these specifiers:
+ *   %c (character)
+ *   %s (string)
+ *   %d (decimal integer)
+ *   %u (unsigned decimal integer)
+ *   %x (hexadecimal integer
+ *   %% (write '%' character)
+ */
+int printf(const char* format, ...)
+{
+    int size = 0;
+    va_list ap;
+    const char* ptr = format;
+    char* str;
 
-    while (div) {
-        div /= base;
-        if (!div) break;
-        length++;
-    }
-
-    return length;
-}
-
-// Exponentiation function
-uint32_t v_pow(const int32_t base, const uint32_t exponent) {
-    uint32_t i;
-    uint32_t res = 1;
-
-    for (i = 0; i < exponent; ++i) {
-        res *= base;
-    }
-
-    return res;
-}
-
-void print_base(int32_t number, uint8_t base) {
-    uint32_t i, digit;
-    const uint32_t ln = len(number, base);
-    uint32_t mult = v_pow(base, ln - 1);
-
-    if (number < 0) {
-        putc('-');
-        number = -number;
-    }
-
-    if (base == 16) {
-        putc('0');
-        putc('x');
-    }
-
-    for (i = 0; i < ln; ++i) {
-        digit = (number / mult) % base;
-        if (digit < 10) {
-            putc((char) digit + ASCII_0);
-        } else if (digit < 35) {
-            putc((char) (digit - 10) + ASCII_a);
+    va_start(ap, format);
+    while (*ptr) {
+        if (*ptr == '%') {
+            ptr++;
+            switch (*ptr) {
+              case 'c':
+                putchar((char) va_arg(ap, int));
+                size++;
+                break;
+              case 's':
+                str = va_arg(ap, char*);
+                while (*str) {
+                    putchar(*str++);
+                    size++;
+                }
+                break;
+              case 'd':
+                size += print_dec(va_arg(ap, int));
+                break;
+              case 'u':
+                size += print_udec(va_arg(ap, unsigned int));
+                break;
+              case 'x':
+                size += print_uhex(va_arg(ap, int));
+                break;
+              case '%':
+                putchar('%');
+                size++;
+            }
         } else {
-            putc('?');
+            putchar(*ptr);
+            size++;
         }
-        mult /= base;
+        ptr++;
     }
+    va_end(ap);
+
+    return size;
 }
 
 
@@ -149,6 +140,16 @@ static void scroll(void) {
     }
 }
 
+static void putln(void) {
+    x = 0;
+    y++;
+    if (y == MAX_ROWS) {
+        scroll();
+        y--;
+    }
+    update_cursor();
+}
+
 static void update_cursor(void) {
     uint16_t location = y * MAX_COLS + x;
 
@@ -159,4 +160,95 @@ static void update_cursor(void) {
     outb(0x3d5, location >> 8);
     outb(0x3d4, 15);            // Send the low cursor byte
     outb(0x3d5, location);
+}
+
+// Get number of digits of a number (signed)
+static unsigned int len(const int number, const char base) {
+    unsigned int length = 1;
+    unsigned int div = ABS(number);
+
+    while (div) {
+        div /= base;
+        if (!div) break;
+        length++;
+    }
+    return length;
+}
+
+// Get number of digits of a number (unsigned)
+static unsigned int ulen(const unsigned int number, const char base) {
+    unsigned int length = 1;
+    unsigned int div = number;
+
+    while (div) {
+        div /= base;
+        if (!div) break;
+        length++;
+    }
+    return length;
+}
+
+// Exponentiation function
+static int pow(const int base, const unsigned int exponent) {
+    unsigned int i;
+    unsigned int res = 1;
+
+    for (i = 0; i < exponent; ++i) {
+        res *= base;
+    }
+    return res;
+}
+
+static int print_dec(int number) {
+    int size = 0;
+    unsigned int i, digit;
+    const unsigned int ln = len(number, 10);
+    int mult = pow(10, ln - 1);
+
+    if (number < 0) {
+        putchar('-');
+        number = -number;
+        size++;
+    }
+    for (i = 0; i < ln; ++i) {
+        digit = (number / mult) % 10;
+        putchar((char) digit + ASCII_0);
+        mult /= 10;
+        size++;
+    }
+    return size;
+}
+
+static int print_udec(const unsigned int number) {
+    unsigned int i, digit;
+    const unsigned int ln = ulen(number, 10);
+    int mult = pow(10, ln - 1);
+
+    for (i = 0; i < ln; ++i) {
+        digit = (number / mult) % 10;
+        putchar((char) digit + ASCII_0);
+        mult /= 10;
+    }
+    return ln;
+}
+
+static int print_uhex(const unsigned int number) {
+    unsigned int i, digit;
+    const unsigned int ln = ulen(number, 16);
+    unsigned int mult = pow(16, ln - 1);
+
+    putchar('0');
+    putchar('x');
+    for (i = 0; i < ln; ++i) {
+        digit = (number / mult) % 16;
+        if (digit < 10) {
+            putchar((char) digit + ASCII_0);
+        } else if (digit < 16) {
+            putchar((char) (digit - 10) + ASCII_a);
+        } else {
+            putchar('?');
+        }
+        mult /= 16;
+    }
+    return ln + 2;
 }

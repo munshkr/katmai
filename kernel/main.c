@@ -28,24 +28,24 @@
 
 void kmain(uint32_t magic, multiboot_info_t* mbi) {
     clear();
-    println("Kernel is on!"); putln();
+    printf("Kernel is on!\n");
 
     if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-        print("Invalid magic code: "); PRINT_HEX(magic); putln();
+        printf("Invalid magic code: %x", magic);
         return;
     }
 
-	// Check if the cpuid instruction is available
-	if (check_cpuid()) {
-		println("CPUID available");
-		if (check_apic()) {
-			println("APIC available");
-		} else {
-			println("APIC no available");
-		}
-	} else {
-		println("CPUID not available");
-	}
+    // Check if the cpuid instruction is available
+    if (check_cpuid()) {
+        printf("CPUID available\n");
+        if (check_apic()) {
+            printf("APIC available\n");
+        } else {
+            printf("APIC not available\n");
+        }
+    } else {
+        printf("CPUID not available\n");
+    }
 
     // Init the floating point unit
     init_fpu();
@@ -57,20 +57,20 @@ void kmain(uint32_t magic, multiboot_info_t* mbi) {
     if (mbi->flags && MULTIBOOT_INFO_MEM_MAP) {
         uint32_t mmap_entries = mbi->mmap_length / 24;
 
-        println("## Memory map ##");
-        print("Entries: "); PRINT_DEC(mmap_entries); putln();
+        printf("## Memory map ##\n");
+        printf("Entries: %u\n", mmap_entries);
 
         multiboot_memory_map_t* mmap_entry = (multiboot_memory_map_t *)
             mbi->mmap_addr;
         for (uint32_t i = 0; i < mmap_entries; ++i, ++mmap_entry) {
-            print("Entry "); PRINT_DEC(i); putln();
-            print("  .addr: "); PRINT_HEX(mmap_entry->addr); putln();
-            print("  .len: "); PRINT_DEC(mmap_entry->len); putln();
-            print("  .type: ");
+            printf("Entry %u\n", i);
+            printf("\t.addr: %x\n", mmap_entry->addr);
+            printf("\t.len: %u\n", mmap_entry->len);
+            printf("\t.type: ");
             if (mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
-                println("available");
+                printf("available\n");
             } else {
-                println("reserved");
+                printf("reserved\n");
             }
         }
     }

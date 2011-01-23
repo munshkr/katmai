@@ -10,7 +10,7 @@ static void timer_callback(registers_t regs)
 {
     regs.u.irq = 0;
     tick++;
-    print("Tick: "); PRINT_DEC(tick); putln();
+    printf("Tick: %u\n", tick);
 }
 
 void init_timer(uint32_t frequency)
