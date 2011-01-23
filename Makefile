@@ -9,15 +9,15 @@ ECHO := /bin/echo -e
 
 # Directories
 BOOTDIR := boot
-KERNELDIRS := kernel
+KERNELDIR := kernel
 LOADER := loader.s
 
 AUXFILES := Makefile README.rst COPYING bochsrc doc
-LOADERFILE := $(shell find $(KERNELDIRS) -mindepth 1 -name $(LOADER))
-ASMFILES := $(shell find $(KERNELDIRS) -mindepth 1 \( -name "*.s" -not -name $(LOADER) \))
-SRCFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.c")
-HDRFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.h")
-MACFILES := $(shell find $(KERNELDIRS) -mindepth 1 -name "*.mac")
+LOADERFILE := $(shell find $(KERNELDIR) -mindepth 1 -name $(LOADER))
+ASMFILES := $(shell find $(KERNELDIR) -mindepth 1 \( -name "*.s" -not -name $(LOADER) \))
+SRCFILES := $(shell find $(KERNELDIR) -mindepth 1 -name "*.c")
+HDRFILES := $(shell find $(KERNELDIR) -mindepth 1 -name "*.h")
+MACFILES := $(shell find $(KERNELDIR) -mindepth 1 -name "*.mac")
 
 KERNELSRCFILES := $(ASMFILES) $(SRCFILES) $(HDRFILES) $(LOADERFILE) $(MACFILES)
 BOOTSRCFILES := $(shell find $(BOOTDIR) -mindepth 1 -name "*.s")
@@ -25,7 +25,7 @@ BOOTSRCFILES := $(shell find $(BOOTDIR) -mindepth 1 -name "*.s")
 ALLFILES := $(BOOTSRCFILES) $(KERNELSRCFILES) $(AUXFILES)
 
 # kernel/loader.o must be linked first when compiling kernel binary
-OBJFILES := kernel/loader.o
+OBJFILES := $(patsubst %.s, %.o, $(LOADERFILE))
 OBJFILES += $(patsubst %.s, %.o, $(ASMFILES))
 OBJFILES += $(patsubst %.c, %.o, $(SRCFILES))
 
@@ -73,7 +73,7 @@ todolist:
 kernel: $(KERNEL_BIN)
 boot: $(BOOT_BIN)
 
-$(KERNEL_BIN): $(OBJFILES)
+$(KERNEL_BIN): $(OBJFILES) $(KERNELSRCFILES)
 	@$(ECHO) "$(BULLET_STRING) $(STEP_COLOR)Linking: $@$(NO_COLOR)"
 	$(LD) $(LDFLAGS) -o $@ $(OBJFILES)
 
