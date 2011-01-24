@@ -80,26 +80,29 @@ void init_idt()
 
     remap_pics(PIC1_OFFSET, PIC2_OFFSET);
 
-    idt_set_gate(PIC1_OFFSET+0, (uint32_t) irq0 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+1, (uint32_t) irq1 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+2, (uint32_t) irq2 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+3, (uint32_t) irq3 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+4, (uint32_t) irq4 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+5, (uint32_t) irq5 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+6, (uint32_t) irq6 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC1_OFFSET+7, (uint32_t) irq7 , CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ0, (uint32_t) irq0, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ1, (uint32_t) irq1, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ2, (uint32_t) irq2, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ3, (uint32_t) irq3, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ4, (uint32_t) irq4, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ5, (uint32_t) irq5, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ6, (uint32_t) irq6, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ7, (uint32_t) irq7, CODE_SEGMENT, INT_GATE_FLAGS);
 
-    idt_set_gate(PIC2_OFFSET+0, (uint32_t) irq8 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+1, (uint32_t) irq9 , CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+2, (uint32_t) irq10, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+3, (uint32_t) irq11, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+4, (uint32_t) irq12, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+5, (uint32_t) irq13, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+6, (uint32_t) irq14, CODE_SEGMENT, INT_GATE_FLAGS);
-    idt_set_gate(PIC2_OFFSET+7, (uint32_t) irq15, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ8, (uint32_t) irq8, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ9, (uint32_t) irq9, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ10, (uint32_t) irq10, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ11, (uint32_t) irq11, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ12, (uint32_t) irq12, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ13, (uint32_t) irq13, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ14, (uint32_t) irq14, CODE_SEGMENT, INT_GATE_FLAGS);
+    idt_set_gate(IRQ15, (uint32_t) irq15, CODE_SEGMENT, INT_GATE_FLAGS);
 
     // Finally load the IDT base address in the LIDT register
     load_idt((void *) &idt_ptr);
+
+    // Let the interrupts come, we're now prepared to handle them ;)
+    __asm __volatile("sti");
 }
 
 
