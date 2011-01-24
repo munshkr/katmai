@@ -58,7 +58,7 @@ $(DISKIMAGE): $(KERNEL_BIN) $(STAGE2_BIN) $(BOOT_BIN)
 	dd if=$(KERNEL_BIN) of=$(DISKIMAGE) bs=512 seek=$(shell echo $(STAGE2_SIZE)+1 | bc) 2>/dev/null
 
 clean:
-	-@$(RM) $(wildcard $(KERNELDIRS)/*.o $(KERNELDIRS)/*.d *.img $(BOOT_BIN) $(STAGE2_BIN) $(KERNEL_BIN) $(DISKIMAGE))
+	-@$(RM) $(wildcard $(KERNELDIR)/*.o $(KERNELDIR)/*.d *.img $(BOOT_BIN) $(STAGE2_BIN) $(KERNEL_BIN) $(DISKIMAGE))
 
 dist:
 	@$(ECHO) "$(BULLET_STRING) $(STEP_COLOR)Making tarball: $(TAR_FILE)$(NO_COLOR)"
